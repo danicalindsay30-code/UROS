@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 def pulse_shaping(symbol_stream, sps, span, rolloff):
     """
     Pulse shape a symbol sequence using a Root Raised Cosine filter.
+    creates the impulse response 
+    convolution then adds these impulse response to form the transmitted wave 
 
     Parameters
     ----------

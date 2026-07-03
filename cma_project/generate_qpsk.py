@@ -10,6 +10,7 @@ def generate_qpsk(num_symbols):
     bit_stream = np.random.randint(0, 2, size = (num_symbols*2))
 
     # Each point is normalised to ensure the magnitude of each constellation is the same
+    #symbol mapper 
     qpsk_mapper = {(0,0): 1/np.sqrt(2)*(1 + 1j),
                      (0,1):1/np.sqrt(2)*(-1 + 1j),
                      (1,1):1/np.sqrt(2)*(-1-1J), 
@@ -17,6 +18,7 @@ def generate_qpsk(num_symbols):
     
     symbol_stream = []
     
+    #loop to identify from a bit pair the corresponding symbol 
     for i in range(0, len(bit_stream),2):
         bit_pair = (bit_stream[i],bit_stream[i+1])
         symbol = qpsk_mapper[bit_pair]

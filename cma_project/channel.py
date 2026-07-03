@@ -9,8 +9,7 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
     plt.plot(np.real(Einput[:,0]))
     plt.title("Horizontal Polarization - Before PMD")
     plt.grid()
-  
-
+    # calculate tau - differential group delay - mutual delay experienced 
     SD_tau = np.sqrt((3 * pi) / 8) * DGDSpec
     tau = (SD_tau * np.sqrt(L * 1e-3) / np.sqrt(N)) * 1e-12
 
@@ -74,3 +73,58 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
     plt.show()
 
     return EOutput
+
+import numpy as np
+
+def noise_insertion_osnr(signal, OSNR_dB, sps, num_polarisations, Rs, B_ref):
+    """
+    Add complex AWGN to the transmitted signal to achieve a target OSNR.
+
+    Parameters
+    signal : ndarray
+        Input signal. Shape (N,) for one polarisation or (N,2) for dual
+        polarisation.
+    OSNR_dB : float
+        Target OSNR in dB.
+    sps : int
+        Samples per symbol.
+    num_polarisations : int
+        Number of transmitted polarisations (1 or 2).
+    Rs : float
+        Symbol rate (symbols/s).
+    B_ref : float
+        Reference bandwidth for the OSNR measurement (Hz).
+
+    Returns:
+    received_signal : ndarray
+        Signal after AWGN has been added.
+    """
+
+    # convert OSNR from dB to linear
+    OSNR_linear = 10 ** (OSNR_dB / 10)
+
+    # convert optical OSNR into the equivalent electrical SNR
+    SNR_linear = ((2 * B_ref) / (num_polarisations * Rs)) * OSNR_linear
+
+    # copy the signal so we don't overwrite the original
+    received_signal = signal.copy()
+
+    # work on one or two polarisations
+    for pol in range(num_polarisations):
+
+        # average signal power
+        signal_power = np.mean(np.abs(signal[:, pol]) ** 2)
+
+        # standard deviation of the AWGN
+        std_dev = np.sqrt(signal_power * sps / (2 * SNR_linear))
+
+        # generate complex Gaussian noise
+        noise = (
+            std_dev * np.random.randn(len(signal))
+            + 1j * std_dev * np.random.randn(len(signal))
+        )
+
+        # add the noise
+        received_signal[:, pol] += noise
+
+    return received_signal

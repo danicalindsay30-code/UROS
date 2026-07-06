@@ -1,5 +1,5 @@
 import numpy as np
-from rrc_filter import RRC_filter
+from transmit_rrc import RRC_filter
 import matplotlib.pyplot as plt
 
 def pulse_shaping(symbol_stream, sps, span, rolloff):
@@ -28,6 +28,7 @@ def pulse_shaping(symbol_stream, sps, span, rolloff):
     # Obtain the RRC filter coefficients (impulse response)
     
     g = RRC_filter(span, sps, rolloff)
+
 
     # Upsample the symbols (insert sps-1 zeros between symbols)
     upsampled_signal = np.zeros(len(symbol_stream) * sps, dtype=complex)

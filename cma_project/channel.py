@@ -5,10 +5,7 @@ import matplotlib.pyplot as plt
 
 def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
     
-    plt.figure()
-    plt.plot(np.real(Einput[:,0]))
-    plt.title("Horizontal Polarization - Before PMD")
-    plt.grid()
+    
     # calculate tau - differential group delay - mutual delay experienced 
     SD_tau = np.sqrt((3 * pi) / 8) * DGDSpec
     tau = (SD_tau * np.sqrt(L * 1e-3) / np.sqrt(N)) * 1e-12
@@ -66,11 +63,7 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
 
     EOutput[:, 0] = np.fft.ifft(freq_EH)
     EOutput[:, 1] = np.fft.ifft(freq_EV)
-    plt.figure()
-    plt.plot(np.real(EOutput[:,0]))
-    plt.title("Horizontal Polarization - After PMD")
-    plt.grid()
-    plt.show()
+   
 
     return EOutput
 

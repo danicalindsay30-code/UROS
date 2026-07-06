@@ -3,18 +3,21 @@ import pulse_shaping as ps
 import matplotlib.pyplot as plt
 import numpy as np 
 import channel
+import adaptive_equaliser as ae
+import receiver_rrc as recieve
 
-num_symbols = 2
+num_symbols = 10000
 
 span = 8
-sps = 8
+sps = 2
 rolloff = 0.35
+R = 1
 
 Rs = 32e9          # 32 GBaud
 OSNR_dB = 20       # fairly clean signal
 B_ref = 12.5e9     # standard OSNR reference bandwidth
 
-DGD_spec = 0.1    # ps/sqrt(km)
+DGD_spec = 10    # ps/sqrt(km)
 num_sections = 20
 fiber_length = 80e3    # 80 km
 bitsH, symbolsH = qk.generate_qpsk(num_symbols)
@@ -42,43 +45,52 @@ E_noise = channel.noise_insertion_osnr(
     Rs,
     B_ref
 )
-plt.figure(figsize=(10,4))
 
-plt.subplot(1,2,1)
-plt.plot(np.real(E_pmd[:,0]))
-plt.title("Before AWGN")
 
-plt.subplot(1,2,2)
-plt.plot(np.real(E_noise[:,0]))
-plt.title("After AWGN")
+
+# Matched filter
+E_matched = recieve.matched_filter(
+    E_noise,
+    span,
+    sps,
+    rolloff
+)
+
+# Downsample to one sample per symbol
+rx = E_matched[::sps]
+
+
+equalised_x,equalised_y = ae.adaptive_equalizer(rx,21,1e-5,1)
+print(equalised_x.shape)
+
+fina_equ = equalised_x[::2]
+print(fina_equ[20:30])
+print(fina_equ.shape)
+
+plt.figure()
+plt.plot(np.abs(fina_equ))
+plt.xlabel("sample")
+plt.ylabel("Magnitude")
+plt.title("Magnitude of Equalised X Signal")
+plt.grid(True)
 plt.show()
 
-plt.figure(figsize=(6,6))
-
-plt.scatter(
-    np.real(E_noise[::sps, 0]),
-    np.imag(E_noise[::sps, 0]),
-    s=20
-)
-
-plt.xlabel("In-phase")
-plt.ylabel("Quadrature")
-plt.title("Horizontal Polarisation Constellation")
-plt.grid()
-plt.axis("equal")
 
 
-plt.figure(figsize=(6,6))
+plt.figure(figsize=(15,5))
 
-plt.scatter(
-    np.real(E_noise[::sps, 1]),
-    np.imag(E_noise[::sps, 1]),
-    s=20
-)
+plt.subplot(131)
+plt.scatter(symbolsH.real, symbolsH.imag)
+plt.title("Original")
 
-plt.xlabel("In-phase")
-plt.ylabel("Quadrature")
-plt.title("Vertical Polarisation Constellation")
-plt.grid()
+
+plt.subplot(132)
+plt.scatter(rx[:,0].real, rx[:,0].imag)
+plt.title("Received")
+
+plt.subplot(133)
+plt.scatter(equalised_x.real, equalised_x.imag)
+plt.title("Equalized")
+
 plt.axis("equal")
 plt.show()

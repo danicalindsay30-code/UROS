@@ -73,6 +73,7 @@ def RRC_filter(span, sps, rolloff):
 
     # Normalise 
 
-    g = g / np.max(np.abs(g))
+    # Unit-energy normalization
+    g = g / np.sqrt(np.sum(np.abs(g)**2))
 
     return g

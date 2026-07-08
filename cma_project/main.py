@@ -6,20 +6,31 @@ import channel
 import adaptive_equaliser as ae
 import receiver_rrc as recieve
 
-num_symbols = 5000
+#Transmitter/modulation parameters
 
-span = 8
-sps = 2
-rolloff = 0.35
-R = 1
+num_symbols = 5000 #number of transmitted QPSK symbols 
+span = 8 #root rasied cosine filter span(symbols )
+sps = 2 # samples per symbol (oversampling factor)
+rolloff = 0.35 #RRC roll-off factor
+R = 1 # constant modulous radiys for QPSK(CMA refrence)
 
-Rs = 32e9          # 32 GBaud
-OSNR_dB = 20       # fairly clean signal
-B_ref = 12.5e9     # standard OSNR reference bandwidth
+#Optical channel parameters 
 
-DGD_spec = 1    # ps/sqrt(km)
-num_sections = 20
-fiber_length = 80e3    # 80 km
+Rs = 32e9          # Symbol rate
+OSNR_dB = 20       # Optical signal-to-noise Rato (dB)
+B_ref = 12.5e9     # reference bandwidth used for OSNR calculation
+
+DGD_spec = 1    # differential group delay [ps/sqrt(km)]
+num_sections = 20 # Number of PMD fibre sections
+fiber_length = 80e3    # Fibre length (m)
+
+#adaptive equaliser parameters
+
+num_taps = 21 # number of FIR taps in each butterfly filter 
+mu = 100e-5 # CMA adaptation step sixe (learning rate )
+
+
+
 
 bitsH, symbolsH = qk.generate_qpsk(num_symbols)
 bitsV, symbolsV = qk.generate_qpsk(num_symbols)
@@ -61,7 +72,7 @@ E_matched = recieve.matched_filter(
 rx = E_matched[::sps]
 
 
-equalised_x,equalised_y = ae.adaptive_equalizer(rx,21,100e-5,1)
+equalised_x,equalised_y = ae.adaptive_equalizer( rx, num_taps, mu , R)
 
 print(equalised_x.shape)
 

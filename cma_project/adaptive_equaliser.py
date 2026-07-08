@@ -49,7 +49,7 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
     #ignore the edges of the input untill a complete window is seen 
 
 
-    for n in range(centre, len(input_x)-centre,2) :
+    for n in range(centre, len(input_x)-centre) :
          # Extract windows
         x_window = input_x[n-centre : n+centre+1]
         y_window = input_y[n-centre : n+centre+1]
@@ -80,7 +80,7 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
     
  
 
-    return output_x, output_y
+    return output_x[2000:], output_y[2000:]
 
 
 

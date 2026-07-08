@@ -6,7 +6,7 @@ import channel
 import adaptive_equaliser as ae
 import receiver_rrc as recieve
 
-num_symbols = 10000
+num_symbols = 5000
 
 span = 8
 sps = 2
@@ -17,9 +17,10 @@ Rs = 32e9          # 32 GBaud
 OSNR_dB = 20       # fairly clean signal
 B_ref = 12.5e9     # standard OSNR reference bandwidth
 
-DGD_spec = 10    # ps/sqrt(km)
+DGD_spec = 1    # ps/sqrt(km)
 num_sections = 20
 fiber_length = 80e3    # 80 km
+
 bitsH, symbolsH = qk.generate_qpsk(num_symbols)
 bitsV, symbolsV = qk.generate_qpsk(num_symbols)
 
@@ -60,12 +61,12 @@ E_matched = recieve.matched_filter(
 rx = E_matched[::sps]
 
 
-equalised_x,equalised_y = ae.adaptive_equalizer(rx,21,1e-5,1)
+equalised_x,equalised_y = ae.adaptive_equalizer(rx,21,100e-5,1)
+
 print(equalised_x.shape)
 
 fina_equ = equalised_x[::2]
-print(fina_equ[20:30])
-print(fina_equ.shape)
+
 
 plt.figure()
 plt.plot(np.abs(fina_equ))

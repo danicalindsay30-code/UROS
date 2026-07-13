@@ -5,10 +5,11 @@ import numpy as np
 import channel
 import adaptive_equaliser as ae
 import receiver_rrc as recieve
+import decider
 
 #Transmitter/modulation parameters
 
-num_symbols = 5000 #number of transmitted QPSK symbols 
+num_symbols = 10000 #number of transmitted QPSK symbols 
 span = 8 #root rasied cosine filter span(symbols )
 sps = 2 # samples per symbol (oversampling factor)
 rolloff = 0.35 #RRC roll-off factor
@@ -20,7 +21,7 @@ Rs = 32e9          # Symbol rate
 OSNR_dB = 20       # Optical signal-to-noise Rato (dB)
 B_ref = 12.5e9     # reference bandwidth used for OSNR calculation
 
-DGD_spec = 1    # differential group delay [ps/sqrt(km)]
+DGD_spec = 0.1    # differential group delay [ps/sqrt(km)]
 num_sections = 20 # Number of PMD fibre sections
 fiber_length = 80e3    # Fibre length (m)
 
@@ -28,6 +29,14 @@ fiber_length = 80e3    # Fibre length (m)
 
 num_taps = 21 # number of FIR taps in each butterfly filter 
 mu = 100e-5 # CMA adaptation step sixe (learning rate )
+
+#constellation 
+constellation = np.array([
+    (1 + 1j),
+    (-1 + 1j),
+    (-1 - 1j),
+    (1 - 1j)
+]) / np.sqrt(2)
 
 
 
@@ -74,9 +83,32 @@ rx = E_matched[::sps]
 
 equalised_x,equalised_y = ae.adaptive_equalizer( rx, num_taps, mu , R)
 
-print(equalised_x.shape)
 
-fina_equ = equalised_x[::2]
+
+
+# Decision device for each polarisation 
+decided_symbolsX, decision_indexX = decider.symbol_decision(
+    equalised_x[::2],
+    constellation
+)
+decided_symbolsY, decision_indexY = decider.symbol_decision(
+    equalised_y[::2],
+    constellation
+)
+
+
+# Demapper
+tx_bits_H = qpsk_demapper(decision_indexX)
+tx_bits_V = qpsk_demapper(decision_indexY)
+
+
+# BER
+tx_bits = np.concatenate((tx_bits_H, tx_bits_V))
+rx_bits = np.concatenate((received_bits_H, received_bits_V))
+
+ber = bit_error_rate(tx_bits, rx_bits)
+
+print("Overall BER =", ber)
 
 
 plt.figure()

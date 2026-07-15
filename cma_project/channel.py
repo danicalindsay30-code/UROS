@@ -9,6 +9,8 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
     # calculate tau - differential group delay - mutual delay experienced 
     SD_tau = np.sqrt((3 * pi) / 8) * DGDSpec
     tau = (SD_tau * np.sqrt(L * 1e-3) / np.sqrt(N)) * 1e-12
+    print("tau =", tau)
+    
 
     N_samples = len(Einput)
 
@@ -37,24 +39,24 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
         U_hermitian = U[i].conj().T
 
         E_1 = (
-            U_hermitian[0, 0] * freq_EV
-            + U_hermitian[0, 1] * freq_EH
+            U_hermitian[0, 0] * freq_EH
+            + U_hermitian[0, 1] * freq_EV
         )
 
         E_2 = (
-            U_hermitian[1, 0] * freq_EV
-            + U_hermitian[1, 1] * freq_EH
+            U_hermitian[1, 0] * freq_EH
+            + U_hermitian[1, 1] * freq_EV
         )
 
         E_1 = np.exp(1j * w * tau / 2) * E_1
         E_2 = np.exp(-1j * w * tau / 2) * E_2
 
-        freq_EV = (
+        freq_EH = (
             V[i, 0, 0] * E_1
             + V[i, 0, 1] * E_2
         )
 
-        freq_EH = (
+        freq_EV = (
             V[i, 1, 0] * E_1
             + V[i, 1, 1] * E_2
         )
@@ -63,7 +65,7 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
 
     EOutput[:, 0] = np.fft.ifft(freq_EH)
     EOutput[:, 1] = np.fft.ifft(freq_EV)
-   
+
 
     return EOutput
 

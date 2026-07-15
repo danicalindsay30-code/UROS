@@ -29,6 +29,9 @@ fiber_length = 80e3    # Fibre length (m)
 
 num_taps = 21 # number of FIR taps in each butterfly filter 
 mu = 100e-5 # CMA adaptation step sixe (learning rate )
+convergence_symbols = 1500 #Number of symbols discarded while the CMA converges 
+#is dependent on the learnimg rate mu 
+
 
 #constellation 
 constellation = np.array([
@@ -40,14 +43,15 @@ constellation = np.array([
 
 
 
-
-bitsH, symbolsH = qk.generate_qpsk(num_symbols)
-bitsV, symbolsV = qk.generate_qpsk(num_symbols)
+tx_bits_H, symbolsH = qk.generate_qpsk(num_symbols)
+tx_bits_V, symbolsV = qk.generate_qpsk(num_symbols)
 
 txH = ps.pulse_shaping(symbolsH, sps, span, rolloff)
 txV = ps.pulse_shaping(symbolsV, sps, span, rolloff)
 
 Einput = np.column_stack((txH, txV))
+
+
 
 E_pmd = channel.PMDInsertion(
     Einput,
@@ -57,6 +61,7 @@ E_pmd = channel.PMDInsertion(
     Rs,
     sps
 )
+
 
 E_noise = channel.noise_insertion_osnr(
     E_pmd,
@@ -68,7 +73,6 @@ E_noise = channel.noise_insertion_osnr(
 )
 
 
-
 # Matched filter
 E_matched = recieve.matched_filter(
     E_noise,
@@ -77,64 +81,85 @@ E_matched = recieve.matched_filter(
     rolloff
 )
 
-# Downsample to one sample per symbol
+
+# Downsample to one sample per symbol chnaged this 
 rx = E_matched[::sps]
 
 
-equalised_x,equalised_y = ae.adaptive_equalizer( rx, num_taps, mu , R)
 
+equalised_x,equalised_y = ae.adaptive_equalizer( rx, num_taps, mu , R)
+equalised_x = equalised_x[convergence_symbols:]
+equalised_y = equalised_y[convergence_symbols:]
+
+#equalised is outputting symbols using two arrays representing the vertical and horizontal
 
 
 
 # Decision device for each polarisation 
 decided_symbolsX, decision_indexX = decider.symbol_decision(
-    equalised_x[::2],
+    equalised_x,
     constellation
 )
 decided_symbolsY, decision_indexY = decider.symbol_decision(
-    equalised_y[::2],
+    equalised_y,
     constellation
 )
 
 
 # Demapper
-tx_bits_H = qpsk_demapper(decision_indexX)
-tx_bits_V = qpsk_demapper(decision_indexY)
+rx_bits_H = decider.qpsk_demapper(decision_indexX)
+rx_bits_V = decider.qpsk_demapper(decision_indexY)
 
 
-# BER
-tx_bits = np.concatenate((tx_bits_H, tx_bits_V))
-rx_bits = np.concatenate((received_bits_H, received_bits_V))
-
-ber = bit_error_rate(tx_bits, rx_bits)
-
-print("Overall BER =", ber)
+tx_bits = np.concatenate((tx_bits_H[convergence_symbols*2:], tx_bits_V[convergence_symbols*2:]))
+rx_bits = np.concatenate((rx_bits_H, rx_bits_V ))
 
 
-plt.figure()
-plt.plot(np.abs(fina_equ))
-plt.xlabel("sample")
-plt.ylabel("Magnitude")
-plt.title("Magnitude of Equalised X Signal")
-plt.grid(True)
-plt.show()
+ber = decider.bit_error_rate(tx_bits,rx_bits)
+print(ber)
 
 
 
-plt.figure(figsize=(15,5))
+# plt.figure()
+# plt.plot(np.abs(equalised_x))
+# plt.xlabel("sample")
+# plt.ylabel("Magnitude")
+# plt.title("Magnitude of Equalised X Signal")
+# plt.grid(True)
+# plt.show()
 
-plt.subplot(131)
-plt.scatter(symbolsH.real, symbolsH.imag)
-plt.title("Original")
+# plt.figure(figsize=(15,5))
+
+# plt.subplot(141)
+# plt.scatter(symbolsH.real, symbolsH.imag)
+# plt.title("Original")
 
 
-plt.subplot(132)
-plt.scatter(rx[:,0].real, rx[:,0].imag)
-plt.title("Received")
+# plt.subplot(142)
+# plt.scatter(rx[:,0].real, rx[:,0].imag)
+# plt.title("Received")
 
-plt.subplot(133)
-plt.scatter(equalised_x.real, equalised_x.imag)
-plt.title("Equalized")
+# plt.subplot(143)
+# plt.scatter(equalised_x.real, equalised_x.imag)
+# plt.title("Equalized")
 
-plt.axis("equal")
-plt.show()
+
+# plt.axis("equal")
+# plt.show()
+# plt.figure(figsize=(10,4))
+
+# plt.subplot(121)
+# plt.scatter(Einput[:,0].real, Einput[:,0].imag, s=2)
+# plt.title("Input to PMD")
+
+# plt.subplot(122)
+# plt.scatter(E_pmd[:,0].real, E_pmd[:,0].imag, s=2)
+# plt.title("Output of PMD")
+
+# plt.axis("equal")
+# plt.show()
+
+# print(Einput[:5])
+# print(E_pmd[:5])
+
+

@@ -80,7 +80,7 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
     
  
 
-    return output_x[2000:], output_y[2000:]
+    return output_x, output_y
 
 
 
@@ -88,5 +88,4 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
     
      
     
-
 

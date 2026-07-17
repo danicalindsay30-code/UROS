@@ -9,7 +9,7 @@ def PMDInsertion(Einput, DGDSpec, N, L, Rs, SpS):
     # calculate tau - differential group delay - mutual delay experienced 
     SD_tau = np.sqrt((3 * pi) / 8) * DGDSpec
     tau = (SD_tau * np.sqrt(L * 1e-3) / np.sqrt(N)) * 1e-12
-    print("tau =", tau)
+
     
 
     N_samples = len(Einput)

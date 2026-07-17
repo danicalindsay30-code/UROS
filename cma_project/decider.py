@@ -66,3 +66,14 @@ def bit_error_rate(tx_bits, rx_bits):
     ber = errors / len(tx_bits)
 
     return ber
+
+def symbol_error_rate(tx_symbols, decided_symbols):
+    """
+    tx_symbols, decided_symbols : complex arrays, same length,
+    already aligned (same indexing convention as your BER call).
+    """
+    if len(tx_symbols) != len(decided_symbols):
+        raise ValueError(f"Length mismatch: {len(tx_symbols)} vs {len(decided_symbols)}")
+    errors = np.sum(tx_symbols != decided_symbols)
+    
+    return errors / len(tx_symbols)

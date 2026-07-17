@@ -1,4 +1,6 @@
 import numpy as np
+
+import numpy as np
 def cma(x_window, y_window, output_x, output_y, w_xx, w_xy, w_yx, w_yy, mu, R):
 
     """

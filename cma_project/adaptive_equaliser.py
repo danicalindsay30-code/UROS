@@ -77,8 +77,7 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
 
 
         w_xx, w_xy, w_yx, w_yy = alg.cma(x_window,y_window,output_x[n],output_y[n],w_xx,w_xy,w_yx,w_yy,mu,R)
-    
- 
+
 
     return output_x, output_y
 

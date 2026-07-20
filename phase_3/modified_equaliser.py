@@ -1,26 +1,12 @@
-import numpy as np 
-import adaptive_algorithim as alg
-import matplotlib.pyplot as plt
+import os
+import sys
+import numpy as np
+import quantisie as q
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cma_project'))
 
-def adaptive_equalizer(input_signal, num_taps, mu,R):
+import adaptive_equaliser as ae
 
-    """purpose: peform symbol equalisation 
-    
-    parameters: 
-    input signal: nd array
-    complex recieves signal with shape (N,2)
-    coloumn 0 is one polarisation, coloumn 1 is the other
-
-    num_taps: int 
-    number of samples per symbol 
-    must be odd 
-    
-    mu : float 
-     learning rate controlling coefficient updates
-      
-    return:
-      """
-    
+def adaptive_equalizer_quantized(input_signal, num_taps, mu, R, total_bits, frac_bits, SpS=1, N1=500):
     if num_taps %2 ==0:
         raise ValueError("num_taps must be odd ")
 
@@ -45,13 +31,8 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
     output_x = np.zeros(len(input_x), dtype=complex)
     output_y = np.zeros(len(input_y), dtype=complex)
 
-   
-    #main processing loop 
-    #ignore the edges of the input untill a complete window is seen 
-
-    max_history = []
-    for n in range(centre, len(input_x)-centre) :
-         # Extract windows
+    for n in range(centre, len(input_x)-centre):
+        # ... compute windows, outputs as normal ...
         x_window = input_x[n-centre : n+centre+1]
         y_window = input_y[n-centre : n+centre+1]
 
@@ -73,29 +54,19 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
         output_x[n] = equalised_xx + equalised_yx
         output_y[n] = equalised_xy + equalised_yy
 
-        
+        output_x[n] = q.quantize(output_x[n], total_bits, frac_bits)
+        output_y[n] = q.quantize(output_y[n], total_bits, frac_bits)
 
+        w_xx, w_xy, w_yx, w_yy = ae.cma(x_window, y_window, output_x, output_y, w_xx, w_xy, w_yx, w_yy, mu, R)
 
+        # quantize taps after every update — this is the key step
+        w_xx = q.quantize(w_xx, total_bits, frac_bits)
+        w_xy = q.quantize(w_xy, total_bits, frac_bits)
+        w_yx = q.quantize(w_yx, total_bits, frac_bits)
+        w_yy = q.quantize(w_yy, total_bits, frac_bits)
 
-        w_xx, w_xy, w_yx, w_yy = alg.cma(x_window,y_window,output_x[n],output_y[n],w_xx,w_xy,w_yx,w_yy,mu,R)
-        all_taps = np.concatenate((w_xx, w_xy, w_yx, w_yy))
-        max_history.append(np.max(np.abs(all_taps)))
+        if n == N1:
+            w_yx = np.conj(w_xy[::-1])
+            w_yy = -np.conj(w_xx[::-1])
 
-
-    plt.figure(figsize=(6,4))
-    plt.plot(max_history)
-    plt.xlabel("Iteration")
-    plt.ylabel("Largest tap magnitude")
-    plt.grid(True)
-    plt.show()
- 
-    print("Largest received sample =", np.max(np.abs(input_signal)))
     return output_x, output_y
-
-
-
-   
-    
-     
-    
-

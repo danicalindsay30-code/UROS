@@ -102,3 +102,5 @@ def run_pipeline(
         result["raw_y"] = raw_y
 
     return result
+
+run_pipeline()

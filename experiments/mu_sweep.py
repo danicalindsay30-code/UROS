@@ -6,9 +6,7 @@ from pipeline import run_pipeline   # adjust import to match your actual filenam
 import time
 from pipeline import run_pipeline
 
-t0 = time.time()
-run_pipeline(mu=1e-3, seed=0)
-print("single run took", time.time() - t0, "s")
+
 
 mu_values = [5e-5, 1e-4, 5e-4, 1e-3, 3e-3, 5e-3, 8e-3, 1e-2]
 ber_results = []

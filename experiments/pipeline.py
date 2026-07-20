@@ -29,6 +29,7 @@ def run_pipeline(
     bps_N=25,
     bps_B=64,
     seed=None,
+    return_convergence_trace = False,
 ):
     """Runs the full tx->channel->rx->equalizer->phase recovery->BER pipeline once.
     Returns a dict of results, including BER, SER, and diagnostics."""

@@ -53,6 +53,10 @@ def run_pipeline(
     rx = E_matched[::sps]
 
     equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
+    if return_convergence_trace:
+        # keep the raw, pre-truncation output for convergence analysis
+        raw_x, raw_y = equalised_x.copy(), equalised_y.copy()
+
     equalised_x = equalised_x[convergence_symbols:]
     equalised_y = equalised_y[convergence_symbols:]
 
@@ -86,8 +90,14 @@ def run_pipeline(
     rx_bits = np.concatenate((rx_bits_H, rx_bits_V))
     ber = decider.bit_error_rate(tx_bits, rx_bits)
 
-    return {
+    result = {
         "DGD_spec": DGD_spec, "mu": mu, "OSNR_dB": OSNR_dB, "num_taps": num_taps,
         "seed": seed, "swapped": swapped, "rot_x": rot_x, "rot_y": rot_y,
         "ser_x": ser_x, "ser_y": ser_y, "ber": ber,
     }
+
+    if return_convergence_trace:
+        result["raw_x"] = raw_x
+        result["raw_y"] = raw_y
+
+    return result

@@ -31,7 +31,7 @@ fiber_length = 80e3    # Fibre length (m)
 #adaptive equaliser parameters
 
 num_taps = 21 # number of FIR taps in each butterfly filter 
-mu = 100e-5 # CMA adaptation step sixe (learning rate )
+mu = 100e-5 # CMA adaptation step size (learning rate )
 convergence_symbols = 1500 #Number of symbols discarded while the CMA converges 
 #is dependent on the learnimg rate mu 
 

@@ -2,6 +2,7 @@ import numpy as np
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cma_project'))
 
+
 import generate_qpsk as qk
 import pulse_shaping as ps
 import channel
@@ -9,6 +10,10 @@ import adaptive_equaliser as ae
 import receiver_rrc as recieve
 import decider
 import phase_recovery
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'phase_3'))
+#from phase 3 
+import modified_equaliser as m_ae
 
 
 def run_pipeline(
@@ -30,6 +35,8 @@ def run_pipeline(
     bps_B=64,
     seed=None,
     return_convergence_trace = False,
+    total_bits = None,
+    frac_bits = None
 ):
     """Runs the full tx->channel->rx->equalizer->phase recovery->BER pipeline once.
     Returns a dict of results, including BER, SER, and diagnostics."""
@@ -53,7 +60,14 @@ def run_pipeline(
     E_matched = recieve.matched_filter(E_noise, span, sps, rolloff)
     rx = E_matched[::sps]
 
-    equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
+    #quantisesed equaliser test 
+    if total_bits is not None:
+        equalised_x, equalised_y, coeff_max_mag = m_ae.adaptive_equalizer_quantized(
+            rx, num_taps, mu, R, total_bits, frac_bits
+        )
+    else:
+        equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
+        coeff_max_mag = None
     if return_convergence_trace:
         # keep the raw, pre-truncation output for convergence analysis
         raw_x, raw_y = equalised_x.copy(), equalised_y.copy()
@@ -94,7 +108,7 @@ def run_pipeline(
     result = {
         "DGD_spec": DGD_spec, "mu": mu, "OSNR_dB": OSNR_dB, "num_taps": num_taps,
         "seed": seed, "swapped": swapped, "rot_x": rot_x, "rot_y": rot_y,
-        "ser_x": ser_x, "ser_y": ser_y, "ber": ber,
+        "ser_x": ser_x, "ser_y": ser_y, "ber": ber,"coeff_max_mag":coeff_max_mag
     }
 
     if return_convergence_trace:

@@ -1,72 +1,59 @@
-import os
-import sys
+import os, sys
 import numpy as np
-import quantisie as q
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cma_project'))
+import adaptive_algorithim as alg
+import quantisie as q
 
-import adaptive_equaliser as ae
 
-def adaptive_equalizer_quantized(input_signal, num_taps, mu, R, total_bits, frac_bits, SpS=1, N1=500):
-    if num_taps %2 ==0:
-        raise ValueError("num_taps must be odd ")
+def adaptive_equalizer_quantized(input_signal, num_taps, mu, R, total_bits, frac_bits):
+    if num_taps % 2 == 0:
+        raise ValueError("num_taps must be odd")
 
-    # fir input vectors, seperating the polarisations
-    input_x = input_signal[:,0]
-    input_y = input_signal[:,1]
+    input_x = input_signal[:, 0]
+    input_y = input_signal[:, 1]
 
-    #initalise the filters 
-    w_xx = np.zeros(num_taps,dtype= complex) #recievedx, outputx  
-    w_xy = np.zeros(num_taps,dtype= complex) #recieved x at output y 
-    w_yx = np.zeros(num_taps,dtype= complex) # recieved y at output x 
-    w_yy = np.zeros(num_taps,dtype= complex)#recieved x at output x 
+    w_xx = np.zeros(num_taps, dtype=complex)
+    w_xy = np.zeros(num_taps, dtype=complex)
+    w_yx = np.zeros(num_taps, dtype=complex)
+    w_yy = np.zeros(num_taps, dtype=complex)
 
-    #initialise the centre taps 
-    #only straight through filters should start at 1 
     centre = num_taps // 2
     w_xx[centre] = 1
-    w_yy[centre]=1
+    w_yy[centre] = 1
 
-
-    #initialise the outouts 
     output_x = np.zeros(len(input_x), dtype=complex)
     output_y = np.zeros(len(input_y), dtype=complex)
 
-    for n in range(centre, len(input_x)-centre):
-        # ... compute windows, outputs as normal ...
-        x_window = input_x[n-centre : n+centre+1]
-        y_window = input_y[n-centre : n+centre+1]
+    coeff_max_mag = 0.0  # for Section 4.2 later
 
+    for n in range(centre, len(input_x) - centre):
+        x_window = input_x[n - centre: n + centre + 1]
+        y_window = input_y[n - centre: n + centre + 1]
 
-        # Four FIR filters
+        equalised_xx = np.vdot(w_xx, x_window)
+        equalised_xy = np.vdot(w_xy, x_window)
+        equalised_yx = np.vdot(w_yx, y_window)
+        equalised_yy = np.vdot(w_yy, y_window)
 
-        # Received X -> Output X
-        equalised_xx = np.vdot( w_xx, x_window)
-        # Received X -> Output Y
-        equalised_xy = np.vdot(w_xy, x_window )
+        out_x = equalised_xx + equalised_yx
+        out_y = equalised_xy + equalised_yy
 
-        # Received Y -> Output X
-        equalised_yx = np.vdot( w_yx, y_window )
+        out_x = q.quantize(out_x, total_bits, frac_bits)
+        out_y = q.quantize(out_y, total_bits, frac_bits)
+        output_x[n] = out_x
+        output_y[n] = out_y
 
-        # Received Y -> Output Y
-        equalised_yy = np.vdot( w_yy, y_window )
+        w_xx, w_xy, w_yx, w_yy = alg.cma(
+            x_window, y_window, out_x, out_y, w_xx, w_xy, w_yx, w_yy, mu, R
+        )
 
-        # Combine contributions
-        output_x[n] = equalised_xx + equalised_yx
-        output_y[n] = equalised_xy + equalised_yy
-
-        output_x[n] = q.quantize(output_x[n], total_bits, frac_bits)
-        output_y[n] = q.quantize(output_y[n], total_bits, frac_bits)
-
-        w_xx, w_xy, w_yx, w_yy = ae.cma(x_window, y_window, output_x, output_y, w_xx, w_xy, w_yx, w_yy, mu, R)
-
-        # quantize taps after every update — this is the key step
         w_xx = q.quantize(w_xx, total_bits, frac_bits)
         w_xy = q.quantize(w_xy, total_bits, frac_bits)
         w_yx = q.quantize(w_yx, total_bits, frac_bits)
         w_yy = q.quantize(w_yy, total_bits, frac_bits)
 
-        if n == N1:
-            w_yx = np.conj(w_xy[::-1])
-            w_yy = -np.conj(w_xx[::-1])
+        current_max = max(np.max(np.abs(w_xx)), np.max(np.abs(w_xy)),
+                           np.max(np.abs(w_yx)), np.max(np.abs(w_yy)))
+        coeff_max_mag = max(coeff_max_mag, current_max)
 
-    return output_x, output_y
+    return output_x, output_y, coeff_max_mag

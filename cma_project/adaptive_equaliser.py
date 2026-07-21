@@ -81,15 +81,6 @@ def adaptive_equalizer(input_signal, num_taps, mu,R):
         all_taps = np.concatenate((w_xx, w_xy, w_yx, w_yy))
         max_history.append(np.max(np.abs(all_taps)))
 
-
-    plt.figure(figsize=(6,4))
-    plt.plot(max_history)
-    plt.xlabel("Iteration")
-    plt.ylabel("Largest tap magnitude")
-    plt.grid(True)
-    plt.show()
- 
-    print("Largest received sample =", np.max(np.abs(input_signal)))
     return output_x, output_y
 
 

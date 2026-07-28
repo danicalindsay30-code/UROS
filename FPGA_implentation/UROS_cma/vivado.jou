@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:02:23 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Tue Jul 28 18:09:24 2026
+# Process ID         : 21312
+# Current directory  : C:/Users/zceedll/UROS project/FPGA_implentation/UROS_cma
+# Command line       : vivado.exe -gui_launcher_event rodinguilauncherevent16712 C:\Users\zceedll\UROS project\FPGA_implentation\UROS_cma\UROS_cma.xpr
+# Log file           : C:/Users/zceedll/UROS project/FPGA_implentation/UROS_cma/vivado.log
+# Journal file       : C:/Users/zceedll/UROS project/FPGA_implentation/UROS_cma\vivado.jou
+# Running On         : ALEXANDER
+# Platform           : Windows 11
+# Operating System   : 26200
+# Processor Detail   : Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz
+# CPU Frequency      : 2904 MHz
+# CPU Physical cores : 8
+# CPU Logical cores  : 16
+# Host memory        : 34030 MB
+# Swap memory        : 2147 MB
+# Total Virtual      : 36177 MB
+# Available Virtual  : 16906 MB
+#-----------------------------------------------------------start_gui
+

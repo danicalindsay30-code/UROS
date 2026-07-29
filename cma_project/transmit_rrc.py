@@ -78,7 +78,3 @@ def RRC_filter(span, sps, rolloff):
 
     return g
 
-g = RRC_filter(span=8, sps=2, rolloff=0.35)
-print(g)
-coeff_fixed = np.round(g * 128).astype(int)
-print(coeff_fixed)

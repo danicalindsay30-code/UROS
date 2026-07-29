@@ -17,7 +17,7 @@ import modified_equaliser as m_ae
 
 
 def run_pipeline(
-    num_symbols=50000,
+    num_symbols=50,#50000
     span=8,
     sps=2,
     rolloff=0.35,
@@ -57,64 +57,83 @@ def run_pipeline(
 
     E_pmd = channel.PMDInsertion(Einput, DGD_spec, num_sections, fiber_length, Rs, sps)
     E_noise = channel.noise_insertion_osnr(E_pmd, OSNR_dB, sps, 2, Rs, B_ref)
+    # Find the largest magnitude over all four streams
+    max_val = np.max(np.abs([
+        np.real(E_noise[:,0]),
+        np.imag(E_noise[:,0]),
+        np.real(E_noise[:,1]),
+        np.imag(E_noise[:,1])
+    ]))
+
+
+    scale = 127 / max_val
+    samples = np.column_stack((
+    np.round(np.real(E_noise[:,0]) * scale).astype(np.int8),
+    np.round(np.imag(E_noise[:,0]) * scale).astype(np.int8),
+    np.round(np.real(E_noise[:,1]) * scale).astype(np.int8),
+    np.round(np.imag(E_noise[:,1]) * scale).astype(np.int8)
+))
+
+    np.savetxt("input_samples.txt", samples, fmt="%d")
+    
     E_matched = recieve.matched_filter(E_noise, span, sps, rolloff)
     rx = E_matched[::sps]
 
-    #quantisesed equaliser test 
-    if total_bits is not None:
-        equalised_x, equalised_y, coeff_max_mag = m_ae.adaptive_equalizer_quantized(
-            rx, num_taps, mu, R, total_bits, frac_bits
-        )
-    else:
-        equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
-        coeff_max_mag = None
-    if return_convergence_trace:
-        # keep the raw, pre-truncation output for convergence analysis
-        raw_x, raw_y = equalised_x.copy(), equalised_y.copy()
+    # #quantisesed equaliser test 
+    # if total_bits is not None:
+    #     equalised_x, equalised_y, coeff_max_mag = m_ae.adaptive_equalizer_quantized(
+    #         rx, num_taps, mu, R, total_bits, frac_bits
+    #     )
+    # else:
+    #     equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
+    #     coeff_max_mag = None
+    # if return_convergence_trace:
+    #     # keep the raw, pre-truncation output for convergence analysis
+    #     raw_x, raw_y = equalised_x.copy(), equalised_y.copy()
 
-    equalised_x = equalised_x[convergence_symbols:]
-    equalised_y = equalised_y[convergence_symbols:]
+    # equalised_x = equalised_x[convergence_symbols:]
+    # equalised_y = equalised_y[convergence_symbols:]
 
-    ref_H = symbolsH[convergence_symbols:convergence_symbols + len(equalised_x)]
-    ref_V = symbolsV[convergence_symbols:convergence_symbols + len(equalised_y)]
+    # ref_H = symbolsH[convergence_symbols:convergence_symbols + len(equalised_x)]
+    # ref_V = symbolsV[convergence_symbols:convergence_symbols + len(equalised_y)]
 
-    # Polarization swap check
-    corr_x_H = np.abs(np.vdot(equalised_x, ref_H))
-    corr_x_V = np.abs(np.vdot(equalised_x, ref_V))
-    swapped = corr_x_V > corr_x_H
-    if swapped:
-        equalised_x, equalised_y = equalised_y, equalised_x
+    # # Polarization swap check
+    # corr_x_H = np.abs(np.vdot(equalised_x, ref_H))
+    # corr_x_V = np.abs(np.vdot(equalised_x, ref_V))
+    # swapped = corr_x_V > corr_x_H
+    # if swapped:
+    #     equalised_x, equalised_y = equalised_y, equalised_x
 
-    # Phase recovery
-    equalised_x, theta_x = phase_recovery.bps_phase_recovery(equalised_x, constellation, N=bps_N, B=bps_B)
-    equalised_y, theta_y = phase_recovery.bps_phase_recovery(equalised_y, constellation, N=bps_N, B=bps_B)
+    # # Phase recovery
+    # equalised_x, theta_x = phase_recovery.bps_phase_recovery(equalised_x, constellation, N=bps_N, B=bps_B)
+    # equalised_y, theta_y = phase_recovery.bps_phase_recovery(equalised_y, constellation, N=bps_N, B=bps_B)
 
-    equalised_x, rot_x, _ = phase_recovery.resolve_residual_ambiguity(equalised_x, constellation, ref_H)
-    equalised_y, rot_y, _ = phase_recovery.resolve_residual_ambiguity(equalised_y, constellation, ref_V)
+    # equalised_x, rot_x, _ = phase_recovery.resolve_residual_ambiguity(equalised_x, constellation, ref_H)
+    # equalised_y, rot_y, _ = phase_recovery.resolve_residual_ambiguity(equalised_y, constellation, ref_V)
 
-    decided_x, decision_index_x = decider.symbol_decision(equalised_x, constellation)
-    decided_y, decision_index_y = decider.symbol_decision(equalised_y, constellation)
+    # decided_x, decision_index_x = decider.symbol_decision(equalised_x, constellation)
+    # decided_y, decision_index_y = decider.symbol_decision(equalised_y, constellation)
 
-    ser_x = decider.symbol_error_rate(ref_H, decided_x)
-    ser_y = decider.symbol_error_rate(ref_V, decided_y)
+    # ser_x = decider.symbol_error_rate(ref_H, decided_x)
+    # ser_y = decider.symbol_error_rate(ref_V, decided_y)
 
-    rx_bits_H = decider.qpsk_demapper(decision_index_x)
-    rx_bits_V = decider.qpsk_demapper(decision_index_y)
+    # rx_bits_H = decider.qpsk_demapper(decision_index_x)
+    # rx_bits_V = decider.qpsk_demapper(decision_index_y)
 
-    tx_bits = np.concatenate((tx_bits_H[convergence_symbols*2:], tx_bits_V[convergence_symbols*2:]))
-    rx_bits = np.concatenate((rx_bits_H, rx_bits_V))
-    ber = decider.bit_error_rate(tx_bits, rx_bits)
+    # tx_bits = np.concatenate((tx_bits_H[convergence_symbols*2:], tx_bits_V[convergence_symbols*2:]))
+    # rx_bits = np.concatenate((rx_bits_H, rx_bits_V))
+    # ber = decider.bit_error_rate(tx_bits, rx_bits)
 
-    result = {
-        "DGD_spec": DGD_spec, "mu": mu, "OSNR_dB": OSNR_dB, "num_taps": num_taps,
-        "seed": seed, "swapped": swapped, "rot_x": rot_x, "rot_y": rot_y,
-        "ser_x": ser_x, "ser_y": ser_y, "ber": ber,"coeff_max_mag":coeff_max_mag
-    }
+    # result = {
+    #     "DGD_spec": DGD_spec, "mu": mu, "OSNR_dB": OSNR_dB, "num_taps": num_taps,
+    #     "seed": seed, "swapped": swapped, "rot_x": rot_x, "rot_y": rot_y,
+    #     "ser_x": ser_x, "ser_y": ser_y, "ber": ber,"coeff_max_mag":coeff_max_mag
+    # }
 
-    if return_convergence_trace:
-        result["raw_x"] = raw_x
-        result["raw_y"] = raw_y
+    # if return_convergence_trace:
+    #     result["raw_x"] = raw_x
+    #     result["raw_y"] = raw_y
 
-    return result
+    # return result
 
-run_pipeline()
+run_pipeline(seed =42)

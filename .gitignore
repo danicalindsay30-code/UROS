@@ -11,3 +11,6 @@
 
 xsim.dir/
 *.wdb
+# Python
+__pycache__/
+*.pyc

@@ -8,20 +8,20 @@ from transmit_rrc import RRC_filter
 
 
 max_seen = 0.0
-for seed in [1, 2, 3, 4, 5]:
-    for dgd in [0.1, 0.5, 1.0]:
-        for mu_test in [50e-5, 100e-5, 300e-5, 500e-5]:  # include larger mu to stress overshoot
-            r = run_pipeline(seed=seed, DGD_spec=dgd, mu=mu_test, total_bits=32, frac_bits=24)
-            max_seen = max(max_seen, r["coeff_max_mag"])
+worst_seed = None 
+worst_mu = None 
+dgd = 1 
 
-for mu_test in [50e-5, 100e-5, 300e-5, 500e-5, 1000e-5, 5000e-5]:
-    mu_max = 0.0
-    for seed in [1, 2, 3]:
-        r = run_pipeline(seed=seed, DGD_spec=0.5, mu=mu_test, total_bits=32, frac_bits=24)
-        mu_max = max(mu_max, r["coeff_max_mag"])
-    print(f"mu={mu_test:.0e}  max tap magnitude = {mu_max:.4f}")
+for seed in [1, 2, 3]:
+    for mu_test in [50e-5, 100e-5, 300e-5, 500e-5]:  # include larger mu to stress overshoot
+        r = run_pipeline(seed=seed, DGD_spec=dgd, mu=mu_test, total_bits=32, frac_bits=24)
+        if r["coeff_max_mag"] > max_seen:
+            max_seen = r["coeff_max_mag"]
+            worst_seed = seed
+            worst_mu = mu_test
 
-print("Worst-case CMA tap magnitude observed:", max_seen)
+print(f"Worst-case CMA tap magnitude observed: {max_seen:.4f}")
+print(f"Occurred for seed={worst_seed}, mu={worst_mu}")
 
 span = 8
 sps = 2

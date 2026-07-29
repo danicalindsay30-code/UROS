@@ -20,6 +20,13 @@ module FIR_filter(
 
     // Delay line (shift register)
     logic signed [7:0] shift_reg [0:3];
+    
+    initial begin 
+    shift_reg[0] = 0;
+    shift_reg[1] = 0;
+    shift_reg[2] = 0;
+    shift_reg[3] = 0;
+    end
 
     always_ff @(posedge clk) begin
         shift_reg[3] <= shift_reg[2];

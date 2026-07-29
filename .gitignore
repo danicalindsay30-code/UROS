@@ -1,0 +1,13 @@
+# Vivado generated files
+*.jou
+*.log
+*.str
+*.Xil
+
+*.cache/
+*.hw/
+*.sim/
+*.ip_user_files/
+
+xsim.dir/
+*.wdb

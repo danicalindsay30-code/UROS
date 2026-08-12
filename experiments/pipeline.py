@@ -76,8 +76,21 @@ def run_pipeline(
 
     np.savetxt("input_samples.txt", samples, fmt="%d")
     
-    E_matched = recieve.matched_filter(E_noise, span, sps, rolloff)
-    rx = E_matched[::sps]
+    rx = recieve.matched_filter(E_noise, span, sps, rolloff)
+    # rx = E_matched[::sps]
+
+    scale = 127 / np.max(np.abs(rx))
+
+    python_out = np.column_stack((
+        np.round(np.real(rx[:,0]) * scale).astype(np.int8),
+        np.round(np.imag(rx[:,0]) * scale).astype(np.int8),
+        np.round(np.real(rx[:,1]) * scale).astype(np.int8),
+        np.round(np.imag(rx[:,1]) * scale).astype(np.int8)
+    ))
+
+    np.savetxt("python_model_out.txt", python_out, fmt="%d")
+
+
 
     # #quantisesed equaliser test 
     # if total_bits is not None:

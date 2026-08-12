@@ -39,8 +39,9 @@ def pulse_shaping(symbol_stream, sps, span, rolloff):
     pulse_shaped_signal = np.convolve(
         upsampled_signal,
         g,
-        mode="same"
+        mode="full"
     )
+    #changed mode from same to full
 
     # Normalise to unit average power
     pulse_shaped_signal = (

@@ -1,16 +1,27 @@
+# ========================================
 # Vivado generated files
+# ========================================
+
+# Logs and temporary files
 *.jou
 *.log
 *.str
-*.Xil
 
+# Vivado generated directories
+.Xil/
 *.cache/
 *.hw/
 *.sim/
 *.ip_user_files/
+*.runs/
 
+# Simulation generated files
 xsim.dir/
 *.wdb
-# Python
+
+# ========================================
+# Python generated files
+# ========================================
+
 __pycache__/
 *.pyc

@@ -1,0 +1,17 @@
+taps[0]  = 0;
+taps[1]  = 1;
+taps[2]  = -2;
+taps[3]  = 2;
+taps[4]  = 5;
+taps[5]  = -12;
+taps[6]  = -8;
+taps[7]  = 55;
+taps[8]  = 99;
+taps[9]  = 55;
+taps[10] = -8;
+taps[11] = -12;
+taps[12] = 5;
+taps[13] = 2;
+taps[14] = -2;
+taps[15] = 1;
+taps[16] = 0;

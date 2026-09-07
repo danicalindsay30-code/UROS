@@ -3,7 +3,7 @@
 module dp_matched_filter_tb;
 
     localparam NUM_TAPS = 17;
-    localparam NUM_BITS = 100;
+    localparam NUM_BITS = 116;
 
     logic clk;
 
@@ -79,7 +79,7 @@ module dp_matched_filter_tb;
     initial begin
 
         file = $fopen(
-            "C:/Users/zceedll/UROS project/input_samples.txt",
+            "C:/Users/zceedll/Documents/Final UROS/input_samples.txt",
             "r"
         );
 
@@ -120,7 +120,7 @@ module dp_matched_filter_tb;
     initial begin
 
         outfile = $fopen(
-            "C:/Users/zceedll/UROS project/sv_filter_output.txt",
+            "C:/Users/zceedll/Documents/Final UROS/sv_filter_output.txt",
             "w"
         );
 

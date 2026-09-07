@@ -32,8 +32,8 @@ def matched_filter(received_signal, span, sps, rolloff):
    
 
     # Dual polarization
-    filtered_x = np.convolve(received_signal[:, 0], h, mode="same")
-    filtered_y = np.convolve(received_signal[:, 1], h, mode="same")
+    filtered_x = np.convolve(received_signal[:, 0], h, mode="full")[:len(received_signal[:, 0])]
+    filtered_y = np.convolve(received_signal[:, 1], h, mode="full")[:len(received_signal[:, 0])]
 
     return np.column_stack((filtered_x, filtered_y))
 

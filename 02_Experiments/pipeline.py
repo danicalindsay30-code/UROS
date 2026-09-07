@@ -1,6 +1,13 @@
 import numpy as np
 import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cma_project'))
+sys.path.append(
+    os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        '01_Python',
+        'Golden_model'
+    )
+)
 
 
 import generate_qpsk as qk
@@ -11,7 +18,7 @@ import receiver_rrc as recieve
 import decider
 import phase_recovery
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'phase_3'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '04_Fixed_point_analysis'))
 #from phase 3 
 import modified_equaliser as m_ae
 
@@ -66,12 +73,12 @@ def run_pipeline(
     ]))
 
 
-    scale = 127 / max_val
+    input_scale = 127 / max_val
     samples = np.column_stack((
-    np.round(np.real(E_noise[:,0]) * scale).astype(np.int8),
-    np.round(np.imag(E_noise[:,0]) * scale).astype(np.int8),
-    np.round(np.real(E_noise[:,1]) * scale).astype(np.int8),
-    np.round(np.imag(E_noise[:,1]) * scale).astype(np.int8)
+    np.round(np.real(E_noise[:,0]) * input_scale).astype(np.int8),
+    np.round(np.imag(E_noise[:,0]) * input_scale).astype(np.int8),
+    np.round(np.real(E_noise[:,1]) * input_scale).astype(np.int8),
+    np.round(np.imag(E_noise[:,1]) * input_scale).astype(np.int8)
 ))
 
     np.savetxt("input_samples.txt", samples, fmt="%d")
@@ -82,10 +89,10 @@ def run_pipeline(
     scale = 127 / np.max(np.abs(rx))
 
     python_out = np.column_stack((
-        np.round(np.real(rx[:,0]) * scale).astype(np.int8),
-        np.round(np.imag(rx[:,0]) * scale).astype(np.int8),
-        np.round(np.real(rx[:,1]) * scale).astype(np.int8),
-        np.round(np.imag(rx[:,1]) * scale).astype(np.int8)
+        np.round(np.real(rx[:,0]) * input_scale).astype(np.int32),
+        np.round(np.imag(rx[:,0]) * input_scale).astype(np.int32),
+        np.round(np.real(rx[:,1]) * input_scale).astype(np.int32),
+        np.round(np.imag(rx[:,1]) * input_scale).astype(np.int32)
     ))
 
     np.savetxt("python_model_out.txt", python_out, fmt="%d")

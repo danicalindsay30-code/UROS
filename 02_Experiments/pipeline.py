@@ -99,20 +99,89 @@ def run_pipeline(
 
 
 
-    # #quantisesed equaliser test 
-    # if total_bits is not None:
-    #     equalised_x, equalised_y, coeff_max_mag = m_ae.adaptive_equalizer_quantized(
-    #         rx, num_taps, mu, R, total_bits, frac_bits
-    #     )
-    # else:
-    #     equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
-    #     coeff_max_mag = None
-    # if return_convergence_trace:
-    #     # keep the raw, pre-truncation output for convergence analysis
-    #     raw_x, raw_y = equalised_x.copy(), equalised_y.copy()
+    #quantisesed equaliser test 
+    if total_bits is not None:
+        equalised_x, equalised_y, coeff_max_mag = m_ae.adaptive_equalizer_quantized(
+            rx, num_taps, mu, R, total_bits, frac_bits
+        )
+    else:
+        equalised_x, equalised_y = ae.adaptive_equalizer(rx, num_taps, mu, R)
 
-    # equalised_x = equalised_x[convergence_symbols:]
-    # equalised_y = equalised_y[convergence_symbols:]
+        # =========================================================
+        # RANGE ANALYSIS FOR FPGA FIXED-POINT DESIGN
+        # =========================================================
+
+        # 1. RX input range
+        rx_x_real_max = np.max(np.abs(np.real(rx[:, 0])))
+        rx_x_imag_max = np.max(np.abs(np.imag(rx[:, 0])))
+
+        rx_y_real_max = np.max(np.abs(np.real(rx[:, 1])))
+        rx_y_imag_max = np.max(np.abs(np.imag(rx[:, 1])))
+
+        # 2. Equaliser output range
+        out_x_real_max = np.max(np.abs(np.real(equalised_x)))
+        out_x_imag_max = np.max(np.abs(np.imag(equalised_x)))
+
+        out_y_real_max = np.max(np.abs(np.real(equalised_y)))
+        out_y_imag_max = np.max(np.abs(np.imag(equalised_y)))
+
+        # 3. Squared magnitude |y|²
+        magnitude_squared_x = (
+            np.real(equalised_x)**2 +
+            np.imag(equalised_x)**2
+        )
+
+        magnitude_squared_y = (
+            np.real(equalised_y)**2 +
+            np.imag(equalised_y)**2
+        )
+
+        mag_sq_x_max = np.max(magnitude_squared_x)
+        mag_sq_y_max = np.max(magnitude_squared_y)
+
+        # 4. CMA error
+        error_x = R - magnitude_squared_x
+        error_y = R - magnitude_squared_y
+
+        error_x_max = np.max(np.abs(error_x))
+        error_y_max = np.max(np.abs(error_y))
+
+
+        # =========================================================
+        # PRINT RESULTS
+        # =========================================================
+
+        print("\n========================================")
+        print("      FPGA RANGE ANALYSIS")
+        print("========================================")
+
+        print("\n--- RX INPUT ---")
+        print("X real max:", rx_x_real_max)
+        print("X imag max:", rx_x_imag_max)
+        print("Y real max:", rx_y_real_max)
+        print("Y imag max:", rx_y_imag_max)
+
+        print("\n--- EQUALISER OUTPUT ---")
+        print("X real max:", out_x_real_max)
+        print("X imag max:", out_x_imag_max)
+        print("Y real max:", out_y_real_max)
+        print("Y imag max:", out_y_imag_max)
+
+        print("\n--- SQUARED MAGNITUDE ---")
+        print("|X|² max:", mag_sq_x_max)
+        print("|Y|² max:", mag_sq_y_max)
+
+        print("\n--- CMA ERROR ---")
+        print("Error X max:", error_x_max)
+        print("Error Y max:", error_y_max)
+
+    print("\n========================================")
+    if return_convergence_trace:
+        # keep the raw, pre-truncation output for convergence analysis
+        raw_x, raw_y = equalised_x.copy(), equalised_y.copy()
+
+    equalised_x = equalised_x[convergence_symbols:]
+    equalised_y = equalised_y[convergence_symbols:]
 
     # ref_H = symbolsH[convergence_symbols:convergence_symbols + len(equalised_x)]
     # ref_V = symbolsV[convergence_symbols:convergence_symbols + len(equalised_y)]

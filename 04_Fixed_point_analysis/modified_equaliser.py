@@ -1,6 +1,13 @@
 import os, sys
 import numpy as np
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'cma_project'))
+sys.path.append(
+    os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        '01_Python',
+        'Golden_model'
+    )
+)
 import adaptive_algorithim as alg
 import quantisie as q
 

@@ -3,18 +3,22 @@
 module complex_fir #(
     parameter NUM_TAPS = 17
 )(
-    input  logic                    clk,
+    input logic                    clk,
 
-    input  logic signed [7:0]       sample_real,
-    input  logic signed [7:0]       sample_imag,
+    input logic signed [7:0]       sample_real,
+    input logic signed [7:0]       sample_imag,
 
-    output logic signed [23:0]      output_real,
-    output logic signed [23:0]      output_imag
+    output logic signed [23:0]     output_real,
+    output logic signed [23:0]     output_imag
 );
 
 
+    // =========================================================
     // Complex shift registers
-   
+    // Samples are represented using 8-bit signed integers.
+    // We store the real and imaginary components separately
+    // because SystemVerilog does not have a native complex type.
+    // =========================================================
 
     logic signed [7:0] shift_real [0:NUM_TAPS-1];
     logic signed [7:0] shift_imag [0:NUM_TAPS-1];
@@ -27,10 +31,20 @@ module complex_fir #(
     end
 
 
+    // =========================================================
     // Complex tap coefficients
+    //
+    // Coefficients use 16-bit Q4.12 fixed-point format.
+    //
+    // 16 bits total:
+    // 4 bits for signed/integer range
+    // 12 bits for fractional precision
+    //
+    // The coefficients are adaptive and will be updated by CMA.
+    // =========================================================
 
-    logic signed [7:0] taps_real [0:NUM_TAPS-1];
-    logic signed [7:0] taps_imag [0:NUM_TAPS-1];
+    logic signed [15:0] taps_real [0:NUM_TAPS-1];
+    logic signed [15:0] taps_imag [0:NUM_TAPS-1];
 
     initial begin
 
@@ -40,8 +54,18 @@ module complex_fir #(
         end
 
         // Initial identity filter
-        taps_real[NUM_TAPS/2] = 1;
-        taps_imag[NUM_TAPS/2] = 0;
+        //
+        // 1.0 in Q4.12 = 1 * 2^12 = 4096
+        //
+        // This means that initially:
+        // X -> X
+        // Y -> Y
+        //
+        // CMA will adapt these coefficients from this
+        // initial identity state.
+
+        taps_real[NUM_TAPS/2] = 16'sd4096;
+        taps_imag[NUM_TAPS/2] = 16'sd0;
 
     end
 
@@ -63,32 +87,39 @@ module complex_fir #(
     end
 
 
-=
+    // =========================================================
     // Complex multiplication results
     //
-    // need w* × x because Python uses np.vdot().
+    // We need w* × x because Python uses np.vdot().
     //
     // (x_real + jx_imag)(w_real - jw_imag)
     //
     // real = x_real*w_real + x_imag*w_imag
     // imag = x_imag*w_real - x_real*w_imag
+    //
+    // Each sample is 8-bit and each coefficient is 16-bit,
+    // therefore each multiplication produces a 24-bit result.
+    // =========================================================
+
+    logic signed [23:0] mul_real [0:NUM_TAPS-1];
+    logic signed [23:0] mul_imag [0:NUM_TAPS-1];
 
 
-    logic signed [15:0] mul_real [0:NUM_TAPS-1];
-    logic signed [15:0] mul_imag [0:NUM_TAPS-1];
-
-
-
+    // =========================================================
     // Accumulators
+    //
+    // The FIR adds NUM_TAPS complex products together.
+    // The accumulator therefore needs to be wider than
+    // an individual multiplication result to prevent overflow.
+    // =========================================================
+
+    logic signed [28:0] accumulator_real;
+    logic signed [28:0] accumulator_imag;
 
 
-    logic signed [23:0] accumulator_real;
-    logic signed [23:0] accumulator_imag;
-
-
-  
+    // =========================================================
     // Complex FIR calculation
-  
+    // =========================================================
 
     always_comb begin
 

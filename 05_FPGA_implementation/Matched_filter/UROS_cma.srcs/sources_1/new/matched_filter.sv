@@ -87,7 +87,8 @@ module matched_filter #(
 
         // RRC coefficients were multiplied by 128 = 2^7.
         // Shift right by 7 bits to restore the original scale.
-        sample_out = accumulator >>> 7;
+        //adding 64 ensures that the numbers are rounded 
+        sample_out = (accumulator + 64) >>> 7;
 
     end
 

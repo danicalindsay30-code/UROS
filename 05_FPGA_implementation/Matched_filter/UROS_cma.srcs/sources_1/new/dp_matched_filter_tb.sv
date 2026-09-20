@@ -79,7 +79,7 @@ module dp_matched_filter_tb;
     initial begin
 
         file = $fopen(
-            "C:/Users/zceedll/Documents/Final UROS/input_samples.txt",
+            "C:/dev/UROS/03_Data/MF_input_samples.txt",
             "r"
         );
 
@@ -120,7 +120,7 @@ module dp_matched_filter_tb;
     initial begin
 
         outfile = $fopen(
-            "C:/Users/zceedll/Documents/Final UROS/sv_filter_output.txt",
+            "C:/dev/UROS/03_Data/MF_sv_filter_output.txt",
             "w"
         );
 

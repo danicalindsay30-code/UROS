@@ -56,18 +56,16 @@ module matched_filter #(
     logic signed [15:0] mul [0:NUM_TAPS-1];
 
 
-    // =========================================================
+ 
     // Accumulator
     // Wider than individual products because 17 products
     // are being added together.
-    // =========================================================
 
     logic signed [23:0] accumulator;
 
 
-    // =========================================================
+
     // FIR calculation
-    // =========================================================
 
     always_comb begin
 
@@ -93,9 +91,9 @@ module matched_filter #(
     end
 
 
-    // =========================================================
+
     // Display coefficients for simulation
-    // =========================================================
+ 
 
     initial begin
 

@@ -68,7 +68,7 @@ module matched_filter_pipeline #(
     // Sequential pipeline
   
 
-    always_ff @(posedge clk or posedge rst) begin
+    always_ff @(posedge clk ) begin
 
         if (rst) begin
 

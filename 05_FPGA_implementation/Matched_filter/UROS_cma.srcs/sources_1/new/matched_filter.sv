@@ -4,13 +4,14 @@ module matched_filter #(
     parameter NUM_TAPS = 17
 )(
     input  logic               clk,
+    input logic                rst,
     input  logic signed [7:0]  sample_in,
     output logic signed [17:0] sample_out
 );
 
-    // =========================================================
-    // Shift register
-    // =========================================================
+
+    // istantiate Shift register
+  
 
     logic signed [7:0] shift_reg [0:NUM_TAPS-1];
 
@@ -21,10 +22,9 @@ module matched_filter #(
     end
 
 
-    // =========================================================
     // RRC filter coefficients
     // Coefficients are scaled by 128 (2^7)
-    // =========================================================
+
 
     logic signed [7:0] taps [0:NUM_TAPS-1];
 
@@ -33,9 +33,9 @@ module matched_filter #(
     end
 
 
-    // =========================================================
+
     // Shift input samples through the FIR
-    // =========================================================
+
 
     always_ff @(posedge clk) begin
 
@@ -48,10 +48,10 @@ module matched_filter #(
     end
 
 
-    // =========================================================
+  
     // Multiplication results
     // 8-bit sample × 8-bit coefficient = 16-bit product
-    // =========================================================
+
 
     logic signed [15:0] mul [0:NUM_TAPS-1];
 

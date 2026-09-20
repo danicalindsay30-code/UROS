@@ -32,6 +32,7 @@ module dp_matched_filter_tb;
         .NUM_TAPS(NUM_TAPS)
     ) dut (
         .clk(clk),
+        .rst(rst),
 
         .Ix(Ix),
         .Qx(Qx),

@@ -199,13 +199,52 @@ fault.
 
 ### Implementation results
 
-Not yet measured. To be added:
+Vivado 2026.1, target XCK26-SFVC784-2LV-C (Kria KR260),
+out-of-context synthesis of `dp_matched_filter_pipeline`.
 
-- target device XCK26-SFVC784-2LV-C (Kria KR260)
-- worst negative slack at the constrained clock
-- LUT / FF / DSP / BRAM utilisation
-- maximum achievable clock frequency
-- whether the 8×8 multipliers map to DSP48E2 slices or LUTs
+#### Timing at 100 MHz
+
+| Check | Result |
+|---|---|
+| Worst negative slack (WNS) | +5.147 ns |
+| Worst hold slack (WHS) | +0.033 ns |
+| Worst pulse width slack (WPWS) | +4.725 ns |
+| Failing endpoints | 0 of 7220 |
+
+Critical path delay is 10.000 − 5.147 = 4.853 ns, implying a
+theoretical maximum of approximately 206 MHz. This is an inference
+from the 100 MHz run, not a measured result; see the frequency
+sweep below.
+
+#### Utilisation
+
+| Resource | Used | Available | Utilisation |
+|---|---|---|---|
+| CLB registers | 557 | 234,240 | 0.24 % |
+| CLB | 59 | 14,640 | 0.40 % |
+| DSP48E2 | 68 | 1,248 | 5.45 % |
+| Bonded IOB | 108 | 189 | 57.14 % |
+| BUFGCE | 1 | 112 | 0.89 % |
+
+The 17 multipliers per channel map to one DSP48E2 each, giving 68
+across four channels. Register usage is far lower than the RTL
+implies because the DSP48E2 blocks contain their own pipeline
+registers, so the product pipeline stage costs no fabric registers.
+
+I/O is the dominant resource at 57 % of available pins. The design
+currently exposes 108 top-level ports (4×8 input, 4×18 output, plus
+clock, reset and two valid signals). A real deployment streams data
+over an AXI interface rather than dedicated pins; this figure
+reflects the current out-of-context test wrapper, not a realistic
+system integration.
+
+#### Frequency sweep
+
+| Period (ns) | Frequency (MHz) | WNS (ns) | Result |
+|---|---|---|---|
+| 10.000 | 100 | +5.147 | pass |
+
+(to be completed)
 
 ### Hardware verification
 
@@ -241,6 +280,14 @@ Not yet run. Planned tests:
   half the multipliers. Not yet implemented or measured.
 - Only one dataset (seed 42, OSNR 20 dB) has been used. A sweep across
   seeds, OSNR values and DGD values has not yet been run.
+  - The hierarchical utilisation report attributes 10 DSPs to each of
+  the four filter instances (40 total) while the top level reports 68.
+  The remaining 28 are not yet attributed to a hierarchy level. A
+  detailed hierarchical report is needed before any per-channel DSP
+  claim is made.
+- No baseline comparison against the unpipelined version has been
+  run, so the resource and frequency cost of pipelining is not yet
+  isolated.
 
 ---
 

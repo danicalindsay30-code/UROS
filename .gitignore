@@ -1,27 +1,98 @@
 # ========================================
-# Vivado generated files
+# Vivado project files
 # ========================================
+# The .xpr stores absolute paths from the machine that created it,
+# so it does not survive being cloned onto another computer.
+# Rebuild the project from a Tcl script instead.
+*.xpr
+*.xpr.bak
 
-# Logs and temporary files
+# ========================================
+# Vivado logs and temporary files
+# ========================================
 *.jou
 *.log
 *.str
+*.backup.jou
+*.backup.log
+hs_err_pid*.log
+vivado_pid*.str
+vivado*.zip
+webtalk*.jou
+webtalk*.log
+usage_statistics_webtalk*
 
+# ========================================
 # Vivado generated directories
+# ========================================
 .Xil/
 *.cache/
 *.hw/
+*.gen/
 *.sim/
-*.ip_user_files/
 *.runs/
+*.ip_user_files/
+*.srcs/sources_1/ip/
+*.srcs/utils_1/
+*.data/
 
-# Simulation generated files
+# ========================================
+# Simulation output
+# ========================================
 xsim.dir/
 *.wdb
+*.pb
+*.vcd
+*.jou.bak
+xvlog.log
+xvhdl.log
+xelab.log
+xsim.log
+compile.bat
+elaborate.bat
+simulate.bat
 
 # ========================================
-# Python generated files
+# Vitis / PetaLinux
 # ========================================
+.metadata/
+*.sdk/
+_ide/
+*.bit
+*.bin
+*.xsa
+*.hwh
+*.ltx
 
+# ========================================
+# Python
+# ========================================
 __pycache__/
 *.pyc
+*.pyo
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ========================================
+# Editors and OS
+# ========================================
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.swp
+
+# ========================================
+# Keep these - do NOT ignore
+# ========================================
+# rtl/        *.sv *.v *.vh source files
+# tb/         testbenches and test vectors
+# constraints/ *.xdc
+# scripts/    *.tcl project build scripts
+# model/      Python golden model and comparison scripts
+# results/    reports and plots you cite in the README
+#
+# Note: *.bit and *.xsa are ignored above because they are large build
+# outputs. If you want to archive one specific bitstream as evidence,
+# force-add it:  git add -f results/matched_filter_v1.bit

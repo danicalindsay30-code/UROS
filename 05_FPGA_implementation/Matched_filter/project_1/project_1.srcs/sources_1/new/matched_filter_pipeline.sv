@@ -97,7 +97,6 @@ module matched_filter_pipeline #(
             valid_stage1 <= 1'b0;
             valid_stage2 <= 1'b0;
             valid_stage3 <= 1'b0;
-            valid_stage4 <= 1'b0;
             valid_out    <= 1'b0;
 
         end
@@ -172,18 +171,9 @@ module matched_filter_pipeline #(
             // Stage 4: scaling
      
 
-            scaled_val <= (accumulator_reg + 24'sd64) >>> 7;
+            sample_out <= (accumulator_reg + 24'sd64) >>> 7;
 
-            valid_stage4 <= valid_stage3;
-
-
-        
-            // Stage 5: registered output
-          
-
-            sample_out <= scaled_val;
-
-            valid_out <= valid_stage4;
+            valid_out  <= valid_stage3;
 
         end
 

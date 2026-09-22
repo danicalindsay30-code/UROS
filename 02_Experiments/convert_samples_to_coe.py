@@ -1,5 +1,5 @@
-INPUT_FILE = "MF_input_samples.txt"
-OUTPUT_FILE = "MF_input_samples.mem"
+INPUT_FILE = r"C:\dev\UROS\03_Data\MF_input_samples.txt"
+OUTPUT_FILE = r"C:\dev\UROS\03_Data\MF_input_samples.mem"
 
 
 def to_uint8(value):

@@ -1,5 +1,5 @@
 INPUT_FILE = "MF_input_samples.txt"
-OUTPUT_FILE = "MF_input_samples.coe"
+OUTPUT_FILE = "MF_input_samples.mem"
 
 
 def to_uint8(value):
@@ -12,19 +12,13 @@ def to_uint8(value):
 
 with open(INPUT_FILE, "r") as infile, open(OUTPUT_FILE, "w") as outfile:
 
-    # COE header
-    outfile.write("memory_initialization_radix=16;\n")
-    outfile.write("memory_initialization_vector=\n")
-
     words = []
 
     for line_number, line in enumerate(infile, start=1):
 
-    
         if not line.strip():
             continue
 
-        
         values = line.split()
 
         if len(values) != 4:
@@ -34,12 +28,12 @@ with open(INPUT_FILE, "r") as infile, open(OUTPUT_FILE, "w") as outfile:
 
         Ix, Qx, Iy, Qy = map(int, values)
 
-      
         Ix_8 = to_uint8(Ix)
         Qx_8 = to_uint8(Qx)
         Iy_8 = to_uint8(Iy)
         Qy_8 = to_uint8(Qy)
 
+        # Pack as Qy, Iy, Qx, Ix from most significant to least significant byte
         word = (
             (Qy_8 << 24)
             | (Iy_8 << 16)
@@ -47,17 +41,21 @@ with open(INPUT_FILE, "r") as infile, open(OUTPUT_FILE, "w") as outfile:
             | Ix_8
         )
 
-  
         words.append(f"{word:08X}")
 
+    # Pad with zero words until there are exactly 128 lines
+    while len(words) < 128:
+        words.append("00000000")
 
-    for index, word in enumerate(words):
+    if len(words) > 128:
+        raise ValueError(
+            f"Input contains {len(words)} samples, which exceeds 128 lines."
+        )
 
-        if index == len(words) - 1:
-            outfile.write(f"{word};\n")
-        else:
-            outfile.write(f"{word},\n")
+    # Write one hex value per line
+    for word in words:
+        outfile.write(f"{word}\n")
 
 
-print(f"Successfully converted {len(words)} samples.")
+print(f"Successfully converted and padded {len(words)} samples.")
 print(f"Output written to: {OUTPUT_FILE}")

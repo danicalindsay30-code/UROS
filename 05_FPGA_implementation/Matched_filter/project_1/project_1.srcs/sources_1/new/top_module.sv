@@ -42,11 +42,7 @@ module top_module(input logic clk,
         assign running  = (counter <  LAST);
         assign in_flush = (counter >= NUM_SAMPLES);
         
-       //read rom 
-        always_ff @(posedge clk) begin
-           rom_q <= rom[counter[6:0]];
-        end
-        
+     
         //delay flags 
         always_ff @(posedge clk )begin 
            if(rst) begin

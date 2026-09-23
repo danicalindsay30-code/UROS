@@ -60,7 +60,12 @@ module top_module(input logic clk,
            end
         
         end
-   
+   always_ff @(posedge clk) begin
+    if (rst)
+        rom_q <= 32'd0;
+    else
+        rom_q <= rom[counter[6:0]];
+end
     assign {Qy_s, Iy_s, Qx_s, Ix_s} = rom_q;
  
    

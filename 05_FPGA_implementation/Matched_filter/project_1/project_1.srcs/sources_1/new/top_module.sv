@@ -5,14 +5,15 @@ module top_module(input logic clk,
                   input logic rst,
                   output logic valid_out);
                   
-       //counter 
-       logic [7:0]counter;
-       //flags  combinational 
+  
+       //flags - combinational 
        logic running, in_flush;
-       //combinational
+       
        assign running = (counter < 132);
        assign in_flush = (counter >= 116);
        
+       //counter 
+       logic [7:0]counter;
        always_ff @(posedge clk) 
           if (rst)begin
              counter <='0;   
@@ -24,5 +25,9 @@ module top_module(input logic clk,
           else begin
              counter <= counter + 1'b1; 
           end 
+          
+          initial begin 
+             $readmemh
+          end
           
 endmodule

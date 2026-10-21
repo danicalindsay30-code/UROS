@@ -15,7 +15,7 @@ module fir4( input logic clk , rst,
          out <= sum; 
       end 
      
-     logic [11:0] sum; 
+     logic signed[11:0] sum; 
      always_comb begin
         //parallel multiplication 
         for(int i = 0; i < 4; i++) begin

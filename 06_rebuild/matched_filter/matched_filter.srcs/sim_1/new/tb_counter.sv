@@ -4,9 +4,9 @@
 module tb_counter;
 
 logic clk, rst, ena;
-logic [7:0] counter;
+logic [7:0] count;
 
-counter dut(.rst(rst), .clk(clk), .ena(ena), . counter(counter));
+counter dut(.rst(rst), .clk(clk), .ena(ena), .count(count));
 
 
 //generate clock 
@@ -18,18 +18,18 @@ end
 
 //generate stimuli 
 initial begin
-rst = 0 ; ena = 0; counter = '0;
+rst = 1 ; ena = 0; count = 0;
 repeat (3)begin
-#20 rst = 1; 
+   @(posedge clk);
 end
 
 repeat (20) begin 
-#20 ena = 1;
+@(negedge clk) ena = 1; rst = 0;
 end
 
-initial begin 
-$monitor("Time %ot: count = %/b",$time,count )
-end 
+
+$monitor("Time %0t: count = %0db",$time,count )
+
  
 
 end 

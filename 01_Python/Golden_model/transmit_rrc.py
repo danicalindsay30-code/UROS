@@ -78,3 +78,6 @@ def RRC_filter(span, sps, rolloff):
 
     return g
 
+taps = RRC_filter(span=8, sps=2, rolloff=0.35)
+print(np.round(taps, 6))
+

@@ -30,11 +30,17 @@ initial begin
    rst_tb = 1; data_tb = 0;
    
    @(negedge clk_tb)
+   rst_tb = 0;
    
    for(int i = 1; i < 6; i ++) begin 
-      @(posedge clk_tb)
          data_tb = i;
-      
+         @(negedge clk_tb);      
    end 
 end 
+
+initial begin 
+$monitor("time = %0t: register = %0sd", $time, register_tb );
+end 
+
+$finish
 endmodule

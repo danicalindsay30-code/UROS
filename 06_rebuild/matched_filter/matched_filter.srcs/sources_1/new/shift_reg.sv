@@ -1,11 +1,12 @@
 `timescale 1ns / 1ps
 
 
-module shift_reg#(parameter N, parameter W)(
+module shift_reg#(parameter N = 4, 
+                  parameter W = 8)(
                   input logic clk,
                   input logic rst,
-                  input logic signed [W:0] data,
-                  output logic [W:0] register [0: N]);
+                  input logic signed [W-1:0] data,
+                  output logic signed [W-1:0] register [0: N-1]);
                   
                   always_ff @(posedge clk) begin 
                      if (rst) begin 

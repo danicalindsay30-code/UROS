@@ -13,10 +13,17 @@ module fir_param#(parameter NUM_TAPS)
        //shift register
        always_ff @(posedge clk) begin
           register[0] <= in ;
-          for(int i = 0; i< NUM_TAPS; i++) begin 
-          end 
-          
-       end 
+          for(int i = 1; i< NUM_TAPS; i++) begin 
+             register[i] <= register[i-1];
+          end   
+       end
+       
+       //multiplication 
+       always_comb begin
+          for(int i =0 ; i< NUM_TAPS; i++) begin
+             register[i] = register[i] * NUM_TAPS[i]; 
+          end  
+       end  
        
                    
 endmodule

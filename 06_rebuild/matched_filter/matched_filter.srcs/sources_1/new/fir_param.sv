@@ -43,7 +43,8 @@ module fir_param #(
             end
 
             // Registered output: raw sum, no scaling
-            out <= accum;
+            out <= (accum + 64) >>> 7;
+
         end
     end
 

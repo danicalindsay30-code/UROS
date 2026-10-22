@@ -22,6 +22,15 @@ logic [5:0] step = 6'b111111;
 //generate stimuli
 initial begin 
    tb_rst = 1;
+   repeat (2)begin
+   @(posedge tb_clk);
+   end 
+   for(int i = 0; i <6 ; i++) begin
+      @(posedge tb_clk) begin
+         tb_in =  
+      end 
+      
+   end 
    
 end 
 

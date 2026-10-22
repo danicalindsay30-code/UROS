@@ -7,13 +7,23 @@ module fir4( input logic clk , rst,
       logic signed [7:0] register [0:3]; //unpacked array 
       logic signed [10:0] products [0:3] ;
       //shift register 
-      always_ff @(posedge clk) begin 
-         register[0] <= in;
-         for(int i = 1; i < 4 ; i++) begin 
-           register[i] <= register[i-1];
-         end  
-         out <= sum; 
-      end 
+      always_ff @(posedge clk) begin
+    if (rst) begin                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+        // Clear every element of the shift register
+        for (int i = 0; i < 4; i++) begin
+            register[i] <= '0;
+        end
+
+        // Clear the registered output
+        out <= '0;
+    end
+    else begin
+        // Your existing shift-register updates go here
+
+        // Your registered output update goes here
+        out <= sum;
+    end
+end
      
      logic signed[11:0] sum; 
      always_comb begin

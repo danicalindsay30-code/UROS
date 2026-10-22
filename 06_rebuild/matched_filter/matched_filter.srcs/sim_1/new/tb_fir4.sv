@@ -13,8 +13,16 @@ tb_clk = 0;
 forever tb_clk = ~tb_clk; 
 end
 
+//declare arrays 
+//'{} an array assignment pattern that initialises each elemenent in order 
+
+logic [5:0] impulse = 6'b100000;
+logic [5:0] step = 6'b111111;
+ 
 //generate stimuli
 initial begin 
+   tb_rst = 1;
+   
 end 
 
 endmodule

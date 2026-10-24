@@ -1,84 +1,64 @@
 `timescale 1ns / 1ps
 //=====================================================================
-// tb_cmult: self-checking random test, no vector file          YOU WRITE
+// tb_cmult: self-checking random test of both cmult variants
 //---------------------------------------------------------------------
-// The expected answer is computed HERE, in the testbench, with plain
-// integer maths. That works for a block this small. Bigger blocks use
-// Python vectors instead.
-//
-// Test both variants: instantiate TWO DUTs,
-//     u_conj  : cmult #(.AW(24), .BW(8), .CONJ_A(1))   (FIR use)
-//     u_plain : cmult #(.AW(18), .BW(8), .CONJ_A(0))   (update use)
-//
-// PASS when: 0 errors over 1000 random sets AND the corner cases.
+// The expected answer is computed here with 64-bit integer maths, so it
+// can't overflow. 1000 random sets plus the corner cases that break
+// naive widths (most negative values, which have no positive twin).
 //=====================================================================
-
 
 module tb_cmult;
 
-    // Signals for u_conj: AW=24, BW=8
-    logic signed [23:0] a_re_conj, a_im_conj;
-    logic signed [7:0]  b_re_conj, b_im_conj;
-    logic signed [32:0] p_re_conj, p_im_conj;
+    logic signed [23:0] a_re_c, a_im_c;          // u_conj: AW = 24 (tap)
+    logic signed [7:0]  b_re_c, b_im_c;
+    logic signed [32:0] p_re_c, p_im_c;
 
-    // Signals for u_plain: AW=18, BW=8
-    logic signed [17:0] a_re_plain, a_im_plain;
-    logic signed [7:0]  b_re_plain, b_im_plain;
-    logic signed [26:0] p_re_plain, p_im_plain;
+    logic signed [17:0] a_re_p, a_im_p;          // u_plain: AW = 18 (g)
+    logic signed [7:0]  b_re_p, b_im_p;
+    logic signed [26:0] p_re_p, p_im_p;
 
-    // Conjugate complex multiplier
-    cmult #(
-        .AW(24),
-        .BW(8),
-        .CONJ_A(1)
-    ) u_conj (
-        .a_re(a_re_conj),
-        .a_im(a_im_conj),
-        .b_re(b_re_conj),
-        .b_im(b_im_conj),
-        .p_re(p_re_conj),
-        .p_im(p_im_conj)
-    );
+    cmult #(.AW(24), .BW(8), .CONJ_A(1)) u_conj (
+        .a_re(a_re_c), .a_im(a_im_c), .b_re(b_re_c), .b_im(b_im_c), .p_re(p_re_c), .p_im(p_im_c));
+    cmult #(.AW(18), .BW(8), .CONJ_A(0)) u_plain (
+        .a_re(a_re_p), .a_im(a_im_p), .b_re(b_re_p), .b_im(b_im_p), .p_re(p_re_p), .p_im(p_im_p));
 
-    // Ordinary complex multiplier
-    cmult #(
-        .AW(18),
-        .BW(8),
-        .CONJ_A(0)
-    ) u_plain (
-        .a_re(a_re_plain),
-        .a_im(a_im_plain),
-        .b_re(b_re_plain),
-        .b_im(b_im_plain),
-        .p_re(p_re_plain),
-        .p_im(p_im_plain)
-    );
+    int errors = 0, checks = 0;
 
-endmodule
-    
+    task automatic check(input longint ar, ai, br, bi);
+        longint er, ei;
+        // conj(a) * b
+        a_re_c = ar; a_im_c = ai; b_re_c = br; b_im_c = bi;
+        // a * b (a narrowed to 18 bits for this DUT)
+        a_re_p = ar >>> 6; a_im_p = ai >>> 6; b_re_p = br; b_im_p = bi;
+        #1;
+        er = ar * br + ai * bi;  ei = ar * bi - ai * br;
+        if (p_re_c !== er || p_im_c !== ei) begin
+            errors++;
+            if (errors <= 5) $display("conj  a=(%0d,%0d) b=(%0d,%0d): got (%0d,%0d) exp (%0d,%0d)",
+                                      ar, ai, br, bi, p_re_c, p_im_c, er, ei);
+        end
+        er = (ar >>> 6) * br - (ai >>> 6) * bi;  ei = (ar >>> 6) * bi + (ai >>> 6) * br;
+        if (p_re_p !== er || p_im_p !== ei) begin
+            errors++;
+            if (errors <= 5) $display("plain a=(%0d,%0d) b=(%0d,%0d): got (%0d,%0d) exp (%0d,%0d)",
+                                      ar >>> 6, ai >>> 6, br, bi, p_re_p, p_im_p, er, ei);
+        end
+        checks++;
+    endtask
 
-    // TODO 2. Instantiate u_conj and u_plain.
-
-    // TODO 3. In an initial block, a check task:
-    //
-    //   task automatic check_conj(input longint ar, ai, br, bi);
-    //       longint er, ei;
-    //       {drive the DUT inputs}; #1;               // let always_comb settle
-    //       er = ar*br + ai*bi;  ei = ar*bi - ai*br;  // conj(a)*b in 64-bit
-    //       if (u_conj.p_re !== er || ...) begin errors++; $display(...); end
-    //   endtask
-    //
-    //   TIP: longint is 64-bit signed, so this reference maths can't
-    //   overflow, and comparing a 33-bit signed port with a longint
-    //   sign-extends the port. That makes the compare correct.
-    //
-    // TODO 4. Random sets:  $urandom returns 32 unsigned bits. For a signed
-    //   24-bit value:  ar = $signed(24'($urandom));   (8-bit: 8'(...))
-    //
-    // TODO 5. Corner cases, the ones that break naive widths:
-    //   a = -2^23 (most negative 24-bit), b = -128: does the product fit?
-    //   a = 2^23-1, b = 127;  a = 0;  b = 0;  and mixed signs.
-    //
-    // TODO 6. $display("tb_cmult: %0d errors -> %s", errors, errors ? "FAIL" : "PASS"); $finish;
+    initial begin
+        // corner cases
+        check(-(1 <<< 23), -(1 <<< 23), -128, -128);
+        check((1 <<< 23) - 1, (1 <<< 23) - 1, 127, 127);
+        check(-(1 <<< 23), (1 <<< 23) - 1, 127, -128);
+        check(0, 0, -128, 127);
+        check(4194304, 0, 5, -3);          // 1.0 tap times a sample
+        // random
+        repeat (1000)
+            check($signed(24'($urandom)), $signed(24'($urandom)),
+                  $signed(8'($urandom)),  $signed(8'($urandom)));
+        $display("tb_cmult: %0d checks, %0d errors -> %s", checks, errors, errors ? "FAIL" : "PASS");
+        $finish;
+    end
 
 endmodule

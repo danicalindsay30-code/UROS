@@ -1,42 +1,24 @@
 `timescale 1ns / 1ps
 //=====================================================================
-// cma_equaliser: top level, architecture A (multi-cycle)       YOU WRITE
+// cma_equaliser: the 2x2 CMA butterfly equaliser, top level
 //---------------------------------------------------------------------
-// Owns all the STATE: two delay lines (the windows), the tap registers,
-// and the registers between stages. Everything else is the combinational
-// blocks you unit-tested: butterfly, cma_error, cma_update.
+// Holds all the STATE (delay lines, taps, stage registers) and a 4-state
+// machine. The maths blocks (butterfly, cma_error, cma_update) are
+// combinational and always computing; the state machine decides WHEN
+// each result is captured.
 //
-//      in ──► [delay lines x, y] ──► butterfly ──► [y regs] ──► cma_error ──► [e, g regs]
-//                    │                   ▲                                         │
-//                    │                [taps] ◄──────────── cma_update ◄────────────┘
-//                    └─────────────────────────────────────────▲   (window also feeds the update)
-//
-// SCHEDULE: one symbol = K = 4 clocks. A small FSM steps through:
-//
-//   S_IDLE  in_ready = 1. When in_valid: shift the new sample into both
-//           delay lines. If the window is now full (this is the N-th
-//           sample or later) go to S_FIR, else stay in S_IDLE (fill phase).
+//   S_IDLE  in_ready = 1. On in_valid, shift the new sample into both
+//           delay lines. Once N samples are in, go to S_FIR; before
+//           that (fill phase) stay here: no output, no update.
 //   S_FIR   y regs  <= butterfly(windows, taps)
 //   S_ERR   e, g    <= cma_error(y regs)
-//   S_UPD   taps    <= cma_update(g, windows, taps);  out_valid = 1
-//           (y regs still hold this symbol's output) -> back to S_IDLE
+//   S_UPD   taps    <= cma_update(g, windows, taps); out_valid = 1
 //
-// WHY the taps only change in S_UPD and the next sample only enters in
-// S_IDLE: symbol k+1's FIR must use the taps updated by symbol k. That
-// is your Python's "update after every output, before the next one",
-// and it is what makes 0 mismatches against cma_int.py possible.
-// The cost: throughput = f_clk / 4. That is the feedback-loop trade-off.
+// So one symbol = K = 4 clocks. The next sample can't enter before the
+// taps are written, because the next FIR needs them: that is the
+// feedback loop, and it is why throughput is f_clk / 4.
 //
-// FILL PHASE: no output and no update for the first N-1 samples
-// (Python's loop starts at n = c). Count samples in a small counter that
-// stops at N-1.
-//
-// RESET (synchronous, like your matched filter):
-//   delay lines 0, fill counter 0, state S_IDLE,
-//   taps: all 0 EXCEPT wr[XX][N/2] = wr[YY][N/2] = W_ONE (1.0)  <- single spike
-//
-// Reference: cma_int.py run(); test: tb_eq.sv with vectors/N5/eq_in.txt
-// and eq_out_ref.txt (10,008 inputs -> 10,004 outputs).
+// Reset: taps = single spike (1.0 at the centre of w_xx and w_yy).
 //=====================================================================
 
 import eq_pkg::*;
@@ -49,58 +31,108 @@ module cma_equaliser #(
 
     input  logic                  in_valid,
     output logic                  in_ready,
-    input  logic signed [X_W-1:0] x_re_in, x_im_in,     // x polarisation sample
-    input  logic signed [X_W-1:0] y_re_in, y_im_in,     // y polarisation sample
+    input  logic signed [X_W-1:0] x_re_in, x_im_in,
+    input  logic signed [X_W-1:0] y_re_in, y_im_in,
 
     output logic                  out_valid,
-    output logic signed [Y_W-1:0] yx_re, yx_im,          // equalised output x
-    output logic signed [Y_W-1:0] yy_re, yy_im,          // equalised output y
+    output logic signed [Y_W-1:0] yx_re, yx_im,
+    output logic signed [Y_W-1:0] yy_re, yy_im,
 
-    // debug: compare against eq_dbg_ref.txt when outputs mismatch
     output logic signed [E_W-1:0] dbg_e_x, dbg_e_y,
     output logic signed [G_W-1:0] dbg_gx_re, dbg_gx_im, dbg_gy_re, dbg_gy_im
 );
 
-    // TODO 1. State machine type:
-    //            typedef enum logic [1:0] {S_IDLE, S_FIR, S_ERR, S_UPD} state_t;
-    //            state_t state;
+    typedef enum logic [1:0] {S_IDLE, S_FIR, S_ERR, S_UPD} state_t;
+    state_t state;
 
-    // TODO 2. Registers (all written only in always_ff):
-    //            delay lines   xr, xi, yr, yi        [0:N-1]  X_W bits, [0] newest
-    //            taps          wr, wi                [0:3][0:N-1]  W_W bits
-    //            y regs        (4 x Y_W)             written in S_FIR
-    //            e, g regs     (2 x E_W, 4 x G_W)    written in S_ERR
-    //            fill counter  logic [$clog2(N):0] fill;
+    // ---- state ------------------------------------------------------
+    logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1];      // delay lines, [0] = newest
+    logic signed [X_W-1:0] yr [0:N-1], yi [0:N-1];
+    logic signed [W_W-1:0] wr [0:3][0:N-1];             // taps [filter][tap]
+    logic signed [W_W-1:0] wi [0:3][0:N-1];
+    logic signed [Y_W-1:0] y_xr, y_xi, y_yr, y_yi;      // captured in S_FIR
+    logic signed [E_W-1:0] e_x_q, e_y_q;                // captured in S_ERR
+    logic signed [G_W-1:0] gxr_q, gxi_q, gyr_q, gyi_q;
+    logic [$clog2(N+1)-1:0] fill;                       // samples in the window, stops at N-1
 
-    // TODO 3. Combinational blocks, instantiated once, always computing:
-    //            butterfly   #(N) u_bf  ( windows + taps  -> bf_* wires )
-    //            cma_error        u_err ( y REGS          -> err_* wires )
-    //            cma_update  #(N) u_upd ( g REGS + windows + taps -> wr_new, wi_new )
-    //         The FSM decides WHEN each result is captured into a register.
-    //         TIP: this is the "compute always, register when needed" style.
-    //         It keeps every always_ff tiny.
+    // ---- combinational maths ----------------------------------------
+    logic signed [Y_W-1:0] bf_xr, bf_xi, bf_yr, bf_yi;
+    logic signed [E_W-1:0] er_x, er_y;
+    logic signed [G_W-1:0] er_gxr, er_gxi, er_gyr, er_gyi;
+    logic signed [W_W-1:0] wr_new [0:3][0:N-1];
+    logic signed [W_W-1:0] wi_new [0:3][0:N-1];
 
-    // TODO 4. always_ff @(posedge clk):
-    //            if (rst) ... reset everything (see RESET above; use a for
-    //            loop for the arrays, then set the two centre taps).
-    //            else case (state)
-    //              S_IDLE: if (in_valid) begin
-    //                          shift: for (int i = N-1; i > 0; i--) xr[i] <= xr[i-1]; ...
-    //                          xr[0] <= x_re_in; ... (all four)
-    //                          if (fill == N-1) state <= S_FIR;
-    //                          else fill <= fill + 1;
-    //                      end
-    //              S_FIR:  capture bf_* into y regs;            state <= S_ERR;
-    //              S_ERR:  capture err_* into e, g regs;        state <= S_UPD;
-    //              S_UPD:  wr <= wr_new; wi <= wi_new;          state <= S_IDLE;
-    //            endcase
-    //         Q to answer: in S_IDLE the shift uses "<=". On the edge that
-    //         moves to S_FIR, does butterfly see the OLD or the NEW window
-    //         during S_FIR? (NEW: the shift has landed by then. Good.)
+    butterfly #(.N(N)) u_bf (
+        .xr(xr), .xi(xi), .yr(yr), .yi(yi), .wr(wr), .wi(wi),
+        .yx_re(bf_xr), .yx_im(bf_xi), .yy_re(bf_yr), .yy_im(bf_yi)
+    );
 
-    // TODO 5. Outputs (combinational from state and registers):
-    //            assign in_ready  = (state == S_IDLE);
-    //            assign out_valid = (state == S_UPD);
-    //            assign yx_re = <y reg> ... and the dbg_* from the e, g regs.
+    cma_error u_err (
+        .yx_re(y_xr), .yx_im(y_xi), .yy_re(y_yr), .yy_im(y_yi),
+        .e_x(er_x), .e_y(er_y),
+        .gx_re(er_gxr), .gx_im(er_gxi), .gy_re(er_gyr), .gy_im(er_gyi)
+    );
+
+    cma_update #(.N(N)) u_upd (
+        .gx_re(gxr_q), .gx_im(gxi_q), .gy_re(gyr_q), .gy_im(gyi_q),
+        .xr(xr), .xi(xi), .yr(yr), .yi(yi), .wr(wr), .wi(wi),
+        .wr_new(wr_new), .wi_new(wi_new)
+    );
+
+    // ---- registers and state machine --------------------------------
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            state <= S_IDLE;
+            fill  <= '0;
+            for (int i = 0; i < N; i++) begin
+                xr[i] <= '0; xi[i] <= '0; yr[i] <= '0; yi[i] <= '0;
+            end
+            for (int f = 0; f < 4; f++)
+                for (int i = 0; i < N; i++) begin
+                    wr[f][i] <= '0;
+                    wi[f][i] <= '0;
+                end
+            wr[XX][N/2] <= W_W'(W_ONE);          // single spike, book 5.36
+            wr[YY][N/2] <= W_W'(W_ONE);
+            {y_xr, y_xi, y_yr, y_yi} <= '0;
+            {e_x_q, e_y_q}           <= '0;
+            {gxr_q, gxi_q, gyr_q, gyi_q} <= '0;
+        end
+        else begin
+            case (state)
+                S_IDLE: if (in_valid) begin
+                    for (int i = N-1; i > 0; i--) begin
+                        xr[i] <= xr[i-1]; xi[i] <= xi[i-1];
+                        yr[i] <= yr[i-1]; yi[i] <= yi[i-1];
+                    end
+                    xr[0] <= x_re_in; xi[0] <= x_im_in;
+                    yr[0] <= y_re_in; yi[0] <= y_im_in;
+                    if (fill == N-1) state <= S_FIR;     // window full
+                    else             fill  <= fill + 1'b1;
+                end
+                S_FIR: begin
+                    {y_xr, y_xi, y_yr, y_yi} <= {bf_xr, bf_xi, bf_yr, bf_yi};
+                    state <= S_ERR;
+                end
+                S_ERR: begin
+                    e_x_q <= er_x;  e_y_q <= er_y;
+                    gxr_q <= er_gxr; gxi_q <= er_gxi; gyr_q <= er_gyr; gyi_q <= er_gyi;
+                    state <= S_UPD;
+                end
+                S_UPD: begin
+                    wr    <= wr_new;
+                    wi    <= wi_new;
+                    state <= S_IDLE;
+                end
+            endcase
+        end
+    end
+
+    // ---- outputs ------------------------------------------------------
+    assign in_ready  = (state == S_IDLE);
+    assign out_valid = (state == S_UPD);
+    assign {yx_re, yx_im, yy_re, yy_im} = {y_xr, y_xi, y_yr, y_yi};
+    assign {dbg_e_x, dbg_e_y} = {e_x_q, e_y_q};
+    assign {dbg_gx_re, dbg_gx_im, dbg_gy_re, dbg_gy_im} = {gxr_q, gxi_q, gyr_q, gyi_q};
 
 endmodule

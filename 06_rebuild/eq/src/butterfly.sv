@@ -1,21 +1,15 @@
 `timescale 1ns / 1ps
 //=====================================================================
-// butterfly: four complex FIRs, two complex adders, round   YOU WRITE
+// butterfly: four complex FIRs, two complex adders, round + saturate
 //---------------------------------------------------------------------
-// Book 5.25 / 5.26, in your Python names (filter = input, output):
+// Book 5.25 / 5.26 in your Python names (filter = INPUT, OUTPUT):
 //     y_x = FIR(w_xx on x window) + FIR(w_yx on y window)
 //     y_y = FIR(w_xy on x window) + FIR(w_yy on y window)
 //
-// Then round the exact sum (27 frac bits) to y (Q3.13, 16 bits):
-//     y = saturate_16( (sum + 2^13) >>> 14 )
-// Y_SHIFT = 14 is in eq_pkg. Saturate, never wrap: a wrapped y flips
-// sign and pushes every tap the wrong way (see the study guide).
-//
-// Taps come in as 2-D arrays: wr[filter][tap], filter index XX, XY, YX, YY
-// from eq_pkg.
-//
-// Python reference: cma_int.py, from "acc = {...}" to the y = ... line.
-// Unit test: tb_butterfly.sv with vectors/N5/unit_butterfly.txt
+// The exact sum has 27 fractional bits; y keeps 13 (Q3.13):
+//     y = saturate_16( (sum + 2^13) >>> 14 )      round half up
+// Saturate, never wrap: a wrapped y flips sign and pushes every tap
+// the wrong way.
 //=====================================================================
 
 import eq_pkg::*;
@@ -23,38 +17,49 @@ import eq_pkg::*;
 module butterfly #(
     parameter int N = 5
 )(
-    input  logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1],    // x window
-    input  logic signed [X_W-1:0] yr [0:N-1], yi [0:N-1],    // y window
-    input  logic signed [W_W-1:0] wr [0:3][0:N-1],           // taps [filter][tap]
+    input  logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1],
+    input  logic signed [X_W-1:0] yr [0:N-1], yi [0:N-1],
+    input  logic signed [W_W-1:0] wr [0:3][0:N-1],
     input  logic signed [W_W-1:0] wi [0:3][0:N-1],
-    output logic signed [Y_W-1:0] yx_re, yx_im,              // output x, Q3.13
-    output logic signed [Y_W-1:0] yy_re, yy_im               // output y, Q3.13
+    output logic signed [Y_W-1:0] yx_re, yx_im,
+    output logic signed [Y_W-1:0] yy_re, yy_im
 );
 
     localparam int SW = P_W + 1 + $clog2(N);   // one FIR sum
     localparam int AW = SW + 1;                // two FIR sums added
 
-    // TODO 1. Four complex_fir instances. Name them u_xx, u_xy, u_yx, u_yy.
-    //         u_xx and u_xy read the x window; u_yx and u_yy read the y window.
-    //         TIP: passing one row of a 2-D array: .wr(wr[XX]) works.
-    //         Outputs: declare  logic signed [SW-1:0] s_xx_r, s_xx_i, ... (8 signals)
+    localparam logic signed [AW-1:0] HALF  = AW'(1) <<< (Y_SHIFT - 1);
+    localparam longint               Y_MAX = (64'sd1 <<< (Y_W - 1)) - 1;
+    localparam longint               Y_MIN = -(64'sd1 <<< (Y_W - 1));
 
-    // TODO 2. Add the pairs into AW-bit sums (exact):
-    //            ax_r = s_xx_r + s_yx_r;   ax_i = ...   (output x)
-    //            ay_r = s_xy_r + s_yy_r;   ay_i = ...   (output y)
+    function automatic logic signed [Y_W-1:0] round_sat_y(input logic signed [AW-1:0] v);
+        logic signed [AW-1:0] r;
+        r = (v + HALF) >>> Y_SHIFT;
+        if (r > Y_MAX)      return Y_W'(Y_MAX);
+        else if (r < Y_MIN) return Y_W'(Y_MIN);
+        else                return r[Y_W-1:0];
+    endfunction
 
-    // TODO 3. Round and saturate each of the four to Y_W bits.
-    //         Write a function so you write it once:
-    //
-    //   function automatic logic signed [Y_W-1:0] round_sat_y (input logic signed [AW-1:0] v);
-    //       logic signed [AW-1:0] r;
-    //       r = (v + (AW'(1) <<< (Y_SHIFT-1))) >>> Y_SHIFT;    // round half up
-    //       // TODO: if r > 32767 return 32767; if r < -32768 return -32768; else r[Y_W-1:0]
-    //   endfunction
-    //
-    //   TIP: compare against the limits as signed numbers of the SAME width
-    //   as r, e.g.  if (r > AW'(signed'(32767)))  or simply  if (r > 32767)
-    //   (32767 is a signed 32-bit int and r is signed, so the compare is signed).
-    //   Could v + 2^13 overflow AW bits? (worst case is far below 2^(AW-1): no)
+    logic signed [SW-1:0] s_xx_r, s_xx_i, s_xy_r, s_xy_i;
+    logic signed [SW-1:0] s_yx_r, s_yx_i, s_yy_r, s_yy_i;
+
+    complex_fir #(.N(N)) u_xx (.xr(xr), .xi(xi), .wr(wr[XX]), .wi(wi[XX]), .sr(s_xx_r), .si(s_xx_i));
+    complex_fir #(.N(N)) u_xy (.xr(xr), .xi(xi), .wr(wr[XY]), .wi(wi[XY]), .sr(s_xy_r), .si(s_xy_i));
+    complex_fir #(.N(N)) u_yx (.xr(yr), .xi(yi), .wr(wr[YX]), .wi(wi[YX]), .sr(s_yx_r), .si(s_yx_i));
+    complex_fir #(.N(N)) u_yy (.xr(yr), .xi(yi), .wr(wr[YY]), .wi(wi[YY]), .sr(s_yy_r), .si(s_yy_i));
+
+    logic signed [AW-1:0] ax_r, ax_i, ay_r, ay_i;
+
+    always_comb begin
+        ax_r = s_xx_r + s_yx_r;     // output x: x-input filter + y-input filter
+        ax_i = s_xx_i + s_yx_i;
+        ay_r = s_xy_r + s_yy_r;     // output y
+        ay_i = s_xy_i + s_yy_i;
+
+        yx_re = round_sat_y(ax_r);
+        yx_im = round_sat_y(ax_i);
+        yy_re = round_sat_y(ay_r);
+        yy_im = round_sat_y(ay_i);
+    end
 
 endmodule

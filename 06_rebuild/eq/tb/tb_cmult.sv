@@ -13,9 +13,49 @@
 // PASS when: 0 errors over 1000 random sets AND the corner cases.
 //=====================================================================
 
+
 module tb_cmult;
 
-    // TODO 1. Signals for both DUTs (inputs as logic signed, sized to match).
+    // Signals for u_conj: AW=24, BW=8
+    logic signed [23:0] a_re_conj, a_im_conj;
+    logic signed [7:0]  b_re_conj, b_im_conj;
+    logic signed [32:0] p_re_conj, p_im_conj;
+
+    // Signals for u_plain: AW=18, BW=8
+    logic signed [17:0] a_re_plain, a_im_plain;
+    logic signed [7:0]  b_re_plain, b_im_plain;
+    logic signed [26:0] p_re_plain, p_im_plain;
+
+    // Conjugate complex multiplier
+    cmult #(
+        .AW(24),
+        .BW(8),
+        .CONJ_A(1)
+    ) u_conj (
+        .a_re(a_re_conj),
+        .a_im(a_im_conj),
+        .b_re(b_re_conj),
+        .b_im(b_im_conj),
+        .p_re(p_re_conj),
+        .p_im(p_im_conj)
+    );
+
+    // Ordinary complex multiplier
+    cmult #(
+        .AW(18),
+        .BW(8),
+        .CONJ_A(0)
+    ) u_plain (
+        .a_re(a_re_plain),
+        .a_im(a_im_plain),
+        .b_re(b_re_plain),
+        .b_im(b_im_plain),
+        .p_re(p_re_plain),
+        .p_im(p_im_plain)
+    );
+
+endmodule
+    
 
     // TODO 2. Instantiate u_conj and u_plain.
 

@@ -41,10 +41,19 @@ module cmult #(
 
     // TODO 2. In an always_comb, compute the four products.
     always_comb begin
+    if (CONJ_A) begin
        ar_br = a_re * b_re;
        ai_bi = a_im * b_im;
        ar_bi = a_re * b_im;
        ai_br = a_im * b_re;  
+    end
+    else begin
+       ar_br = a_re * b_re;
+       ai_bi = -a_im * b_im;
+       ar_bi = a_re * b_im;
+       ai_br = -a_im * b_re;
+        
+    end  
     end 
 
     // TODO 3. Combine them. CONJ_A is a parameter, so use

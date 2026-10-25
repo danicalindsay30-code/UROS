@@ -2,7 +2,7 @@
 chain.py
 ========
 Shared front end and back end for the equaliser work, copied step for step
-from 01_Python/Golden_model/main.py so every model in 06_rebuild/eq is fed
+from 01_Python/Golden_model/main.py so every model in this folder is fed
 exactly the same signal and scored exactly the same way.
 
     make_rx(...)      -> T-spaced matched-filter output, the equaliser input

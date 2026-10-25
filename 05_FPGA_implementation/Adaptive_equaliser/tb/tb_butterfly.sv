@@ -12,11 +12,14 @@ import eq_pkg::*;
 module tb_butterfly;
 
     localparam int    N   = 5;
-    localparam string VEC = "C:/dev/UROS/06_rebuild/eq/vectors/N5/unit_butterfly.txt";
+    localparam string VEC = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/vectors/N5/unit_butterfly.txt";
 
     logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1], yr [0:N-1], yi [0:N-1];
     logic signed [W_W-1:0] wr [0:3][0:N-1], wi [0:3][0:N-1];
     logic signed [Y_W-1:0] yx_re, yx_im, yy_re, yy_im;
+
+    logic clk = 0;
+    always #5 clk = ~clk;
 
     butterfly #(.N(N)) u_dut (.*);
 
@@ -41,7 +44,7 @@ module tb_butterfly;
             for (int j = 0; j < 4; j++) code += $fscanf(fd, "%d", ex[j]);
             if (code != 12 * N + 4) break;
 
-            #1;
+            @(posedge clk); #1;      // products are registered: result one clock later
             if (yx_re !== ex[0] || yx_im !== ex[1] || yy_re !== ex[2] || yy_im !== ex[3]) begin
                 errors++;
                 if (errors <= 5) $display("row %0d: got (%0d,%0d,%0d,%0d) exp (%0d,%0d,%0d,%0d)",

@@ -13,7 +13,7 @@ implemented for the Kria KR260.
 | RTL implementation (pipelined) | complete |
 | Simulation vs golden model | verified, 100 % within ±1 LSB |
 | Synthesis and implementation | complete, 100–278 MHz sweep |
-| Hardware verification on KR260 | not yet run |
+| Hardware verification on KR260 | complete, 0 mismatches vs RTL simulation |
 
 ---
 
@@ -51,12 +51,12 @@ Qy ──► matched_filter_pipeline ──► Qy_out
 | 1 | 17 multiplies, 8 × 8 → 16-bit | `product_reg` |
 | 2 | 4 partial sums | `partial_sum` |
 | 3 | final accumulate, 24-bit | `accumulator_reg` |
-| 4 | round and rescale, `(acc + 64) >>> 7` | `scaled_val` |
-| 5 | output register | `sample_out` |
+| 4 | round and rescale, `(acc + 64) >>> 7` | `sample_out` |
 
-- Latency: 6 clock cycles
+- Latency: 5 clock cycles
 - Throughput: 1 sample per clock per channel
-- `valid_in` delayed through a matching 6-stage chain → `valid_out`
+- `valid_in` delayed through a matching 5-stage chain (`valid_stage0..3`, `valid_out`) → `valid_out`
+- `scaled_val` and `valid_stage4` are declared in the RTL but unused
 - Reset clears all pipeline and valid registers
 - Coefficients held as a `localparam` array in the RTL
 
@@ -232,16 +232,21 @@ Qy ──► matched_filter_pipeline ──► Qy_out
 
 ---
 
-## 7. Hardware verification (planned)
+## 7. Hardware verification
 
-| # | Test | Proves |
-|---|---|---|
-| 1 | Impulse response | tap order, scaling, latency |
-| 2 | Worst-case magnitude | accumulator width |
-| 3 | Golden-model regression | end-to-end correctness |
-| 4 | Back-pressure | handshake (once AXI-Stream wrapped) |
+- Harness: `top_module.sv` plays the stimulus from a ROM (`MF_input_samples.mem`)
+  into `dp_matched_filter_pipeline`. The outputs are captured with an ILA
+  (`03_Data/ila_capture.csv`). Clock and reset come from the Zynq PS and a VIO
+  (project `mf_board_test`).
+- **Result: golden-model regression on the KR260, 0 mismatches against RTL simulation**
+  (`03_Data/MF_board_sim_out.txt`).
 
-- Pass criterion: hardware vs RTL simulation = **0 mismatches**
+| # | Test | Proves | Status |
+|---|---|---|---|
+| 1 | Impulse response | tap order, scaling, latency | not run |
+| 2 | Worst-case magnitude | accumulator width | not run |
+| 3 | Golden-model regression | end-to-end correctness | **pass, 0 mismatches** |
+| 4 | Back-pressure | handshake (once AXI-Stream wrapped) | not applicable yet |
 
 ---
 
@@ -250,7 +255,6 @@ Qy ──► matched_filter_pipeline ──► Qy_out
 - `input_scale` is data-dependent, not a fixed design constant
 - Accumulator 24 bits where 17 suffice; output 18 bits where 10 suffice
 - Coefficients hardcoded in RTL — no longer generated from the Python model
-- Reset is asynchronous; synchronous reset is preferred on Xilinx devices
 - No clock enable — required before AXI-Stream back-pressure can work
 - Coefficient symmetry not exploited (pre-adder could halve multipliers)
 - Only one dataset tested (seed 42, OSNR 20 dB)
@@ -267,7 +271,11 @@ Qy ──► matched_filter_pipeline ──► Qy_out
 | `matched_filter_pipeline.sv` | single-channel pipelined FIR |
 | `dp_matched_filter_pipeline.sv` | four-channel wrapper |
 | `dp_matched_filter_pipeline_tb.sv` | valid-driven testbench |
-| `timing.xdc` | clock constraint |
+| `timing.xdc` | clock constraint (last sweep point, 3.600 ns; 4.000 ns is the recommended operating point) |
+| `top_module.sv`, `top_module_tb.sv` | KR260 hardware test harness (ROM stimulus) and its testbench |
+| `mf_board_test/` | block design for the hardware test: Zynq PS clock, VIO reset, ILA capture |
+| `practice/` | SystemVerilog exercises written while re-deriving the design: counter, shift register, 4-tap and parameterised FIR, file-driven testbench |
+| `UROS_cma.srcs/` | earlier, unpipelined iterations (`FIR_filter`, `matched_filter`, `dp_matched_filter`) |
 | `results/` | timing and utilisation reports |
 | `03_Data/MF_input_samples.txt` | int8 stimulus |
 | `03_Data/MF_python_model_out.txt` | golden reference |
@@ -284,8 +292,11 @@ Qy ──► matched_filter_pipeline ──► Qy_out
 
 ## 10. Next steps
 
-1. Run on KR260 hardware (ROM + ILA test harness)
-2. Implement the unpipelined baseline for a before/after comparison
-3. Wrap in AXI-Stream with clock enable
-4. Implement symmetric pre-adder variant and compare DSP usage
-5. Move on to the CMA adaptive equaliser
+1. Implement the unpipelined baseline for a before/after comparison
+2. Wrap in AXI-Stream with clock enable
+3. Implement symmetric pre-adder variant and compare DSP usage
+4. Connect to the CMA adaptive equaliser (`../Adaptive_equaliser`): rescale the 18-bit
+   output to the equaliser's 8-bit Q3.5 input and downsample by 2
+
+Done: hardware run on the KR260 (section 7); CMA adaptive equaliser implemented and
+hardware-verified (`../Adaptive_equaliser/README.md`).

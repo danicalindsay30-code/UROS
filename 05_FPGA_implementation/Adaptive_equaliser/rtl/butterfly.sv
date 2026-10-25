@@ -8,7 +8,8 @@
 //
 // The exact sum has 27 fractional bits; y keeps 13 (Q3.13):
 //     y = saturate_16( (sum + 2^13) >>> 14 )      round half up
-// Saturate, never wrap: a wrapped y flips sign and pushes every tap
+// Outputs are valid one clock after the inputs (product registers in
+// complex_fir). Saturate, never wrap: a wrapped y flips sign and pushes every tap
 // the wrong way.
 //=====================================================================
 
@@ -17,6 +18,7 @@ import eq_pkg::*;
 module butterfly #(
     parameter int N = 5
 )(
+    input  logic                  clk,           // for the product registers in complex_fir
     input  logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1],
     input  logic signed [X_W-1:0] yr [0:N-1], yi [0:N-1],
     input  logic signed [W_W-1:0] wr [0:3][0:N-1],
@@ -43,10 +45,10 @@ module butterfly #(
     logic signed [SW-1:0] s_xx_r, s_xx_i, s_xy_r, s_xy_i;
     logic signed [SW-1:0] s_yx_r, s_yx_i, s_yy_r, s_yy_i;
 
-    complex_fir #(.N(N)) u_xx (.xr(xr), .xi(xi), .wr(wr[XX]), .wi(wi[XX]), .sr(s_xx_r), .si(s_xx_i));
-    complex_fir #(.N(N)) u_xy (.xr(xr), .xi(xi), .wr(wr[XY]), .wi(wi[XY]), .sr(s_xy_r), .si(s_xy_i));
-    complex_fir #(.N(N)) u_yx (.xr(yr), .xi(yi), .wr(wr[YX]), .wi(wi[YX]), .sr(s_yx_r), .si(s_yx_i));
-    complex_fir #(.N(N)) u_yy (.xr(yr), .xi(yi), .wr(wr[YY]), .wi(wi[YY]), .sr(s_yy_r), .si(s_yy_i));
+    complex_fir #(.N(N)) u_xx (.clk(clk), .xr(xr), .xi(xi), .wr(wr[XX]), .wi(wi[XX]), .sr(s_xx_r), .si(s_xx_i));
+    complex_fir #(.N(N)) u_xy (.clk(clk), .xr(xr), .xi(xi), .wr(wr[XY]), .wi(wi[XY]), .sr(s_xy_r), .si(s_xy_i));
+    complex_fir #(.N(N)) u_yx (.clk(clk), .xr(yr), .xi(yi), .wr(wr[YX]), .wi(wi[YX]), .sr(s_yx_r), .si(s_yx_i));
+    complex_fir #(.N(N)) u_yy (.clk(clk), .xr(yr), .xi(yi), .wr(wr[YY]), .wi(wi[YY]), .sr(s_yy_r), .si(s_yy_i));
 
     logic signed [AW-1:0] ax_r, ax_i, ay_r, ay_i;
 

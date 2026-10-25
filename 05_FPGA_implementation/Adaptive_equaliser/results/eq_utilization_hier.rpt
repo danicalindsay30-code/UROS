@@ -1,0 +1,105 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Sun Oct 25 01:07:14 2026
+| Host         : Dani running 64-bit major release  (build 9200)
+| Command      : report_utilization -hierarchical -file C:/dev/UROS/06_rebuild/eq/results/eq_utilization_hier.rpt
+| Design       : system_wrapper
+| Device       : xck26-sfvc784-2LV-c
+| Speed File   : -2LV
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++-------------------------------------------------------+------------------------------------------------------+------------+------------+---------+------+------+--------+--------+------+------------+
+|                        Instance                       |                        Module                        | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | URAM | DSP Blocks |
++-------------------------------------------------------+------------------------------------------------------+------------+------------+---------+------+------+--------+--------+------+------------+
+| system_wrapper                                        |                                                (top) |       4284 |       4081 |      20 |  183 | 4284 |     53 |      2 |    0 |        176 |
+|   dbg_hub                                             |                                              dbg_hub |        447 |        427 |      20 |    0 |  753 |      0 |      0 |    0 |          0 |
+|     inst                                              |                           dbg_hub_xsdbm_v3_0_6_xsdbm |        447 |        427 |      20 |    0 |  753 |      0 |      0 |    0 |          0 |
+|       BSCANID.u_xsdbm_id                              |                        dbg_hub_xsdbm_v3_0_6_xsdbm_id |        447 |        427 |      20 |    0 |  753 |      0 |      0 |    0 |          0 |
+|         SWITCH_N_EXT_BSCAN.bscan_switch               |                    dbg_hub_xsdbm_v3_0_6_bscan_switch |        121 |        121 |       0 |    0 |  125 |      0 |      0 |    0 |          0 |
+|         CORE_XSDB.UUT_MASTER                          |                       dbg_hub_xsdbm_v3_0_6_icon2xsdb |        277 |        257 |      20 |    0 |  566 |      0 |      0 |    0 |          0 |
+|           U_ICON_INTERFACE                            |                              dbg_hub_xsdbm_v3_0_6_if |        160 |        140 |      20 |    0 |  456 |      0 |      0 |    0 |          0 |
+|             U_CMD6_WR                                 |                           dbg_hub_xsdbm_v3_0_6_wrreg |         42 |         32 |      10 |    0 |  110 |      0 |      0 |    0 |          0 |
+|               U_WR_FIFO                               |                          dbg_hub_xsdbm_v3_0_6_wrfifo |         40 |         30 |      10 |    0 |   90 |      0 |      0 |    0 |          0 |
+|                 SUBCORE_FIFO.xsdbm_v3_0_6_wrfifo_inst |                       dbg_hub_fifo_generator_v13_1_6 |         39 |         29 |      10 |    0 |   90 |      0 |      0 |    0 |          0 |
+|                   inst_fifo_gen                       |                 dbg_hub_fifo_generator_v13_1_6_synth |         39 |         29 |      10 |    0 |   90 |      0 |      0 |    0 |          0 |
+|                     gconvfifo.rf                      |                           dbg_hub_fifo_generator_top |         39 |         29 |      10 |    0 |   90 |      0 |      0 |    0 |          0 |
+|                       grf.rf                          |                       dbg_hub_fifo_generator_ramfifo |         39 |         29 |      10 |    0 |   90 |      0 |      0 |    0 |          0 |
+|             U_CMD4                                    |         dbg_hub_xsdbm_v3_0_6_ctl_reg__parameterized0 |         14 |         14 |       0 |    0 |   62 |      0 |      0 |    0 |          0 |
+|             U_CMD6_RD                                 |                           dbg_hub_xsdbm_v3_0_6_rdreg |         64 |         54 |      10 |    0 |  134 |      0 |      0 |    0 |          0 |
+|               U_RD_FIFO                               |                          dbg_hub_xsdbm_v3_0_6_rdfifo |         62 |         52 |      10 |    0 |  114 |      0 |      0 |    0 |          0 |
+|                 SUBCORE_FIFO.xsdbm_v3_0_6_rdfifo_inst |       dbg_hub_fifo_generator_v13_1_6__parameterized0 |         42 |         32 |      10 |    0 |  114 |      0 |      0 |    0 |          0 |
+|                   inst_fifo_gen                       | dbg_hub_fifo_generator_v13_1_6_synth__parameterized0 |         42 |         32 |      10 |    0 |  114 |      0 |      0 |    0 |          0 |
+|                     gconvfifo.rf                      |           dbg_hub_fifo_generator_top__parameterized0 |         42 |         32 |      10 |    0 |  114 |      0 |      0 |    0 |          0 |
+|                       grf.rf                          |       dbg_hub_fifo_generator_ramfifo__parameterized0 |         42 |         32 |      10 |    0 |  114 |      0 |      0 |    0 |          0 |
+|           U_XSDB_BUS_CONTROLLER                       |                         dbg_hub_xsdbm_v3_0_6_bus_ctl |         69 |         69 |       0 |    0 |   54 |      0 |      0 |    0 |          0 |
+|   system_i                                            |                                               system |       3837 |       3654 |       0 |  183 | 3531 |     53 |      2 |    0 |        176 |
+|     vio_0                                             |                                       system_vio_0_0 |        217 |        217 |       0 |    0 |  427 |      0 |      0 |    0 |          0 |
+|       inst                                            |                       system_vio_0_0_vio_v3_0_28_vio |        217 |        217 |       0 |    0 |  427 |      0 |      0 |    0 |          0 |
+|         U_XSDB_SLAVE                                  |                    system_vio_0_0_xsdbs_v1_0_6_xsdbs |         77 |         77 |       0 |    0 |  161 |      0 |      0 |    0 |          0 |
+|         DECODER_INST                                  |                   system_vio_0_0_vio_v3_0_28_decoder |         27 |         27 |       0 |    0 |   50 |      0 |      0 |    0 |          0 |
+|         PROBE_IN_INST                                 |              system_vio_0_0_vio_v3_0_28_probe_in_one |        107 |        107 |       0 |    0 |  192 |      0 |      0 |    0 |          0 |
+|     eq_top                                            |                                      system_eq_top_0 |       2529 |       2529 |       0 |    0 | 1171 |     46 |      1 |    0 |        176 |
+|       inst                                            |                         system_eq_top_0_eq_board_top |       2529 |       2529 |       0 |    0 | 1171 |     46 |      1 |    0 |        176 |
+|         u_eq                                          |                        system_eq_top_0_cma_equaliser |       2517 |       2517 |       0 |    0 | 1126 |      0 |      0 |    0 |        176 |
+|           (u_eq)                                      |                        system_eq_top_0_cma_equaliser |         53 |         53 |       0 |    0 | 1126 |      0 |      0 |    0 |          0 |
+|           u_bf                                        |                            system_eq_top_0_butterfly |        580 |        580 |       0 |    0 |    0 |      0 |      0 |    0 |         88 |
+|             u_yy                                      |                       system_eq_top_0_complex_fir_23 |        162 |        162 |       0 |    0 |    0 |      0 |      0 |    0 |         22 |
+|               (u_yy)                                  |                       system_eq_top_0_complex_fir_23 |        158 |        158 |       0 |    0 |    0 |      0 |      0 |    0 |         12 |
+|             u_xx                                      |                          system_eq_top_0_complex_fir |        147 |        147 |       0 |    0 |    0 |      0 |      0 |    0 |         22 |
+|               (u_xx)                                  |                          system_eq_top_0_complex_fir |        139 |        139 |       0 |    0 |    0 |      0 |      0 |    0 |         12 |
+|             u_xy                                      |                       system_eq_top_0_complex_fir_21 |        143 |        143 |       0 |    0 |    0 |      0 |      0 |    0 |         22 |
+|               (u_xy)                                  |                       system_eq_top_0_complex_fir_21 |        139 |        139 |       0 |    0 |    0 |      0 |      0 |    0 |         12 |
+|             u_yx                                      |                       system_eq_top_0_complex_fir_22 |        162 |        162 |       0 |    0 |    0 |      0 |      0 |    0 |         22 |
+|               (u_yx)                                  |                       system_eq_top_0_complex_fir_22 |        158 |        158 |       0 |    0 |    0 |      0 |      0 |    0 |         12 |
+|           u_ex                                        |                               system_eq_top_0_cma_e1 |         60 |         60 |       0 |    0 |    0 |      0 |      0 |    0 |          2 |
+|           u_ey                                        |                             system_eq_top_0_cma_e1_0 |         61 |         61 |       0 |    0 |    0 |      0 |      0 |    0 |          2 |
+|           u_gx                                        |                               system_eq_top_0_cma_g1 |         75 |         75 |       0 |    0 |    0 |      0 |      0 |    0 |          2 |
+|           u_gy                                        |                             system_eq_top_0_cma_g1_1 |         75 |         75 |       0 |    0 |    0 |      0 |      0 |    0 |          2 |
+|           u_upd                                       |                           system_eq_top_0_cma_update |       1617 |       1617 |       0 |    0 |    0 |      0 |      0 |    0 |         80 |
+|             g_filt[3].g_tap[4].u_mul                  |             system_eq_top_0_cmult__parameterized0_20 |         82 |         82 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[0].g_tap[0].u_mul                  |                system_eq_top_0_cmult__parameterized0 |         82 |         82 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[0].g_tap[1].u_mul                  |              system_eq_top_0_cmult__parameterized0_2 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[0].g_tap[2].u_mul                  |              system_eq_top_0_cmult__parameterized0_3 |         81 |         81 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[0].g_tap[3].u_mul                  |              system_eq_top_0_cmult__parameterized0_4 |         81 |         81 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[0].g_tap[4].u_mul                  |              system_eq_top_0_cmult__parameterized0_5 |         82 |         82 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[1].g_tap[0].u_mul                  |              system_eq_top_0_cmult__parameterized0_6 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[1].g_tap[1].u_mul                  |              system_eq_top_0_cmult__parameterized0_7 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[1].g_tap[2].u_mul                  |              system_eq_top_0_cmult__parameterized0_8 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[1].g_tap[3].u_mul                  |              system_eq_top_0_cmult__parameterized0_9 |         82 |         82 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[1].g_tap[4].u_mul                  |             system_eq_top_0_cmult__parameterized0_10 |         83 |         83 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[2].g_tap[0].u_mul                  |             system_eq_top_0_cmult__parameterized0_11 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[2].g_tap[1].u_mul                  |             system_eq_top_0_cmult__parameterized0_12 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[2].g_tap[2].u_mul                  |             system_eq_top_0_cmult__parameterized0_13 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[2].g_tap[3].u_mul                  |             system_eq_top_0_cmult__parameterized0_14 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[2].g_tap[4].u_mul                  |             system_eq_top_0_cmult__parameterized0_15 |         83 |         83 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[3].g_tap[0].u_mul                  |             system_eq_top_0_cmult__parameterized0_16 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[3].g_tap[1].u_mul                  |             system_eq_top_0_cmult__parameterized0_17 |         81 |         81 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[3].g_tap[2].u_mul                  |             system_eq_top_0_cmult__parameterized0_18 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|             g_filt[3].g_tap[3].u_mul                  |             system_eq_top_0_cmult__parameterized0_19 |         80 |         80 |       0 |    0 |    0 |      0 |      0 |    0 |          3 |
+|     ila_0                                             |                                       system_ila_0_0 |       1092 |        909 |       0 |  183 | 1933 |      7 |      1 |    0 |          0 |
+|       inst                                            |                       system_ila_0_0_ila_v6_2_20_ila |       1092 |        909 |       0 |  183 | 1933 |      7 |      1 |    0 |          0 |
+|         ila_core_inst                                 |                  system_ila_0_0_ila_v6_2_20_ila_core |       1091 |        908 |       0 |  183 | 1927 |      7 |      1 |    0 |          0 |
+|           (ila_core_inst)                             |                  system_ila_0_0_ila_v6_2_20_ila_core |         33 |          0 |       0 |   33 |  108 |      0 |      0 |    0 |          0 |
+|           u_ila_cap_ctrl                              |       system_ila_0_0_ila_v6_2_20_ila_cap_ctrl_legacy |         69 |         22 |       0 |   47 |  147 |      0 |      0 |    0 |          0 |
+|             u_cap_addrgen                             |           system_ila_0_0_ila_v6_2_20_ila_cap_addrgen |         53 |         16 |       0 |   37 |  141 |      0 |      0 |    0 |          0 |
+|               (u_cap_addrgen)                         |           system_ila_0_0_ila_v6_2_20_ila_cap_addrgen |         13 |         12 |       0 |    1 |   78 |      0 |      0 |    0 |          0 |
+|           u_ila_regs                                  |              system_ila_0_0_ila_v6_2_20_ila_register |        783 |        782 |       0 |    1 | 1240 |      0 |      0 |    0 |          0 |
+|             (u_ila_regs)                              |              system_ila_0_0_ila_v6_2_20_ila_register |        321 |        320 |       0 |    1 |  176 |      0 |      0 |    0 |          0 |
+|             U_XSDB_SLAVE                              |                    system_ila_0_0_xsdbs_v1_0_6_xsdbs |         76 |         76 |       0 |    0 |  213 |      0 |      0 |    0 |          0 |
+|           u_trig                                      |               system_ila_0_0_ila_v6_2_20_ila_trigger |        134 |         34 |       0 |  100 |  307 |      0 |      0 |    0 |          0 |
+|           xsdb_memory_read_inst                       |            system_ila_0_0_ltlib_v1_0_4_generic_memrd |         63 |         61 |       0 |    2 |   91 |      0 |      0 |    0 |          0 |
++-------------------------------------------------------+------------------------------------------------------+------------+------------+---------+------+------+--------+--------+------+------------+
+* Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
+
+

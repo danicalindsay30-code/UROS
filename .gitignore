@@ -96,3 +96,9 @@ desktop.ini
 # Note: *.bit and *.xsa are ignored above because they are large build
 # outputs. If you want to archive one specific bitstream as evidence,
 # force-add it:  git add -f results/matched_filter_v1.bit
+
+# ========================================
+# Project-specific build output
+# ========================================
+05_FPGA_implementation/Adaptive_equaliser/build/
+*.logfile

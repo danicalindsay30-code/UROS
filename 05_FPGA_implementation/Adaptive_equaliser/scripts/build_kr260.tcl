@@ -1,7 +1,8 @@
-# vivado_build.tcl
-# ================
-# Builds the KR260 bitstream for the CMA equaliser hardware test, same
-# structure as your matched filter board project (mf_board_test):
+# build_kr260.tcl
+# ===============
+# Builds the KR260 hardware test of the CMA equaliser: project, block
+# design, synthesis, implementation, bitstream and reports. Same structure
+# as the matched filter board test (mf_board_test):
 #
 #   Zynq PS  pl_clk0 = 100 MHz ──► eq_board_top, VIO, ILA
 #   VIO      probe_out0 ──► rst   (starts at 1: design held in reset)
@@ -9,22 +10,22 @@
 #   ILA      out_valid, yx_re, yx_im, yy_re, yy_im (4096 samples,
 #            storage qualification on, so it can store outputs only)
 #
-# Run from Git Bash:
-#   /c/AMDDesignTools/2026.1/Vivado/bin/vivado.bat -mode batch -source vivado_build.tcl
-# Output: vivado/eq_board.runs/impl_1/system_wrapper.bit (+ .ltx probes file)
-#         results/eq_utilization.rpt, results/eq_timing.rpt
+# Run from Git Bash, in Adaptive_equaliser/:
+#   /c/AMDDesignTools/2026.1/Vivado/bin/vivado.bat -mode batch -source scripts/build_kr260.tcl
+# Output: build/vivado/eq_board.runs/impl_1/system_wrapper.bit (+ .ltx)
+#         results/eq_utilization.rpt, eq_utilization_hier.rpt, eq_timing.rpt
 
-set root [file normalize [file dirname [info script]]]
-set proj $root/vivado
+set root [file normalize [file dirname [info script]]/..]
+set proj $root/build/vivado
 
 create_project eq_board $proj -part xck26-sfvc784-2LV-c -force
 set_property board_part xilinx.com:kr260_som:part0:2.0 [current_project]
 
 # ---- sources ---------------------------------------------------------
 add_files [list \
-    $root/src/eq_pkg.sv $root/src/cmult.sv $root/src/complex_fir.sv \
-    $root/src/butterfly.sv $root/src/cma_error.sv $root/src/cma_update.sv \
-    $root/src/cma_equaliser.sv $root/src/eq_board_top.sv \
+    $root/rtl/eq_pkg.sv $root/rtl/cmult.sv $root/rtl/complex_fir.sv \
+    $root/rtl/butterfly.sv $root/rtl/cma_error.sv $root/rtl/cma_update.sv \
+    $root/rtl/cma_equaliser.sv $root/rtl/eq_board_top.sv \
     $root/vectors/N5/eq_in_rom.mem $root/vectors/N5/eq_ref_rom.mem]
 set_property file_type SystemVerilog [get_files *.sv]
 update_compile_order -fileset sources_1

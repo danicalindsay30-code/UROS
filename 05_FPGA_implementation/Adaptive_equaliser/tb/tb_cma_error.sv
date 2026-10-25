@@ -12,7 +12,7 @@ import eq_pkg::*;
 
 module tb_cma_error;
 
-    localparam string VEC = "C:/dev/UROS/06_rebuild/eq/vectors/N5/unit_error.txt";
+    localparam string VEC = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/vectors/N5/unit_error.txt";
 
     logic signed [Y_W-1:0] yx_re, yx_im, yy_re, yy_im;
     logic signed [E_W-1:0] e_x, e_y;

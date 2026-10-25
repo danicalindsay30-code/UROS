@@ -12,7 +12,7 @@ import eq_pkg::*;
 module tb_cma_update;
 
     localparam int    N   = 5;
-    localparam string VEC = "C:/dev/UROS/06_rebuild/eq/vectors/N5/unit_update.txt";
+    localparam string VEC = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/vectors/N5/unit_update.txt";
 
     logic signed [G_W-1:0] gx_re, gx_im, gy_re, gy_im;
     logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1], yr [0:N-1], yi [0:N-1];

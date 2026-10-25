@@ -9,7 +9,7 @@
 
 module tb_eq_board;
 
-    localparam string MEM = "C:/dev/UROS/06_rebuild/eq/vectors/N5/";
+    localparam string MEM = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/vectors/N5/";
 
     logic clk = 0, rst = 1;
     always #5 clk = ~clk;

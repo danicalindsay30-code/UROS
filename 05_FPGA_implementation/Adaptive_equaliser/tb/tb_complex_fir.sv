@@ -4,6 +4,7 @@
 //---------------------------------------------------------------------
 // unit_fir.txt row: xr[N] xi[N] wr[N] wi[N] sum_re sum_im
 // The sum is exact, so any difference is a real bug.
+// The products are registered, so the sum appears one clock after the inputs.
 //=====================================================================
 
 import eq_pkg::*;
@@ -12,11 +13,14 @@ module tb_complex_fir;
 
     localparam int    N   = 5;
     localparam int    SW  = P_W + 1 + $clog2(N);
-    localparam string VEC = "C:/dev/UROS/06_rebuild/eq/vectors/N5/unit_fir.txt";
+    localparam string VEC = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/vectors/N5/unit_fir.txt";
 
     logic signed [X_W-1:0] xr [0:N-1], xi [0:N-1];
     logic signed [W_W-1:0] wr [0:N-1], wi [0:N-1];
     logic signed [SW-1:0]  sr, si;
+
+    logic clk = 0;
+    always #5 clk = ~clk;
 
     complex_fir #(.N(N)) u_dut (.*);
 
@@ -38,7 +42,7 @@ module tb_complex_fir;
             code += $fscanf(fd, "%d", e_i);
             if (code != 4 * N + 2) break;
 
-            #1;
+            @(posedge clk); #1;      // products are registered: result one clock later
             if (sr !== e_r || si !== e_i) begin
                 errors++;
                 if (errors <= 5) $display("row %0d: got (%0d,%0d) exp (%0d,%0d)", rows, sr, si, e_r, e_i);

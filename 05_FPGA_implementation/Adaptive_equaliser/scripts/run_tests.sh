@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Runs every equaliser testbench in Vivado's simulator (xsim), no GUI.
-# Usage (Git Bash):  ./run_tests.sh              all tests
-#                    ./run_tests.sh tb_eq        one test
+# Usage (Git Bash):  scripts/run_tests.sh          all tests
+#                    scripts/run_tests.sh tb_eq  one test
 set -e
 VIV=/c/AMDDesignTools/2026.1/Vivado/bin
 HERE=$(cd "$(dirname "$0")" && pwd)
-SRC="$HERE/../src"
+SRC="$HERE/../rtl"
 TB="$HERE/../tb"
-WORK="$HERE/work"
+WORK="$HERE/../build/sim"
 mkdir -p "$WORK" && cd "$WORK"
 
 TESTS=${1:-"tb_cmult tb_cma_error tb_complex_fir tb_butterfly tb_cma_update tb_eq tb_eq_board"}

@@ -18,9 +18,9 @@ import eq_pkg::*;
 module tb_eq;
 
     localparam int    N       = 5;
-    localparam string DIR     = "C:/dev/UROS/06_rebuild/eq/vectors/N5/";
+    localparam string DIR     = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/vectors/N5/";
     localparam int    MAX_IN  = 20000;
-    localparam string OUT_FILE = "C:/dev/UROS/06_rebuild/eq/results/rtl_out_N5.txt";
+    localparam string OUT_FILE = "C:/dev/UROS/05_FPGA_implementation/Adaptive_equaliser/results/rtl_out_N5.txt";
 
     logic clk = 0, rst = 1;
     always #5 clk = ~clk;                         // 100 MHz

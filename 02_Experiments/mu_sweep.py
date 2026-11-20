@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pipeline import run_pipeline   # adjust import to match your actual filename
+from pipeline import run_pipeline
 
 # timing_check.py
 import time

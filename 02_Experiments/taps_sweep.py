@@ -4,8 +4,8 @@ from pipeline import run_pipeline
 
 taps_values = [7, 11, 15, 21, 27, 33, 41]
 
-# use the highest DGD_spec value from your DGD sweep here
-high_dgd = 1.0   # <-- replace with your actual highest tested value
+# highest DGD_spec value from the DGD sweep
+high_dgd = 1.0   # top of the DGD sweep range (dgd_sweep.py)
 
 ber_default_dgd = []
 ber_high_dgd = []

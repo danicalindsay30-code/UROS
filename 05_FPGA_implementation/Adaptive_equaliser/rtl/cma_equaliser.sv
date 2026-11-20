@@ -21,7 +21,7 @@
 //
 // Why 6 and not 4: with fewer stages the FIR path (multiply + add +
 // round) took 10.5 ns and the error path (two multiplies in a row)
-// 10.6 ns, failing 100 MHz. Each split adds a register, like your
+// 10.6 ns, failing 100 MHz. Each split adds a register, like the
 // matched filter's pipeline stages. In the matched filter that was free;
 // here each register sits INSIDE the loop, so each one costs a clock
 // per symbol. Faster clock, same arithmetic, fewer symbols per clock.

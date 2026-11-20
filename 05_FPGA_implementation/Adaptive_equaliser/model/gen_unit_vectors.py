@@ -6,7 +6,7 @@ module, so each module can be unit-tested on its own before integration.
 
 Every row is plain integers separated by spaces. Arrays are written as
 N values in a row, index 0 first (0 = NEWEST sample, the hardware order).
-Filter order is always xx, xy, yx, yy (input, output: your Python names).
+Filter order is always xx, xy, yx, yy (input, output: golden-model names).
 
   unit_fir.txt        xr[N] xi[N] wr[N] wi[N]  sum_re sum_im
                       one complex FIR: exact sum of conj(w)*x, 27 frac bits

@@ -2,7 +2,7 @@
 rtl_ber.py
 ==========
 Step 4b: score the RTL's own output (results/rtl_out_N5.txt, written by
-tb_eq.sv) with your Python back end: swap check, BPS, ambiguity,
+tb_eq.sv) with the golden-model back end: swap check, BPS, ambiguity,
 decision, SER/BER. Also plots the constellation before and after.
 
 Usage:  python rtl_ber.py

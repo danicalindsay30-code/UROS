@@ -2,7 +2,7 @@
 //=====================================================================
 // cma_update: new taps for all four filters, combinational
 //---------------------------------------------------------------------
-// Your Python (adaptive_algorithim.cma), with g = mu*e*conj(y):
+// Golden model (adaptive_algorithim.cma), with g = mu*e*conj(y):
 //     w_xx += g_x * x_window        w_yx += g_x * y_window
 //     w_xy += g_y * x_window        w_yy += g_y * y_window
 //

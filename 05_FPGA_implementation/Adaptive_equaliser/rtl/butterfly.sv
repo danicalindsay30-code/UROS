@@ -2,7 +2,7 @@
 //=====================================================================
 // butterfly: four complex FIRs, two complex adders, round + saturate
 //---------------------------------------------------------------------
-// Book 5.25 / 5.26 in your Python names (filter = INPUT, OUTPUT):
+// Book 5.25 / 5.26 in golden-model names (filter = INPUT, OUTPUT):
 //     y_x = FIR(w_xx on x window) + FIR(w_yx on y window)
 //     y_y = FIR(w_xy on x window) + FIR(w_yy on y window)
 //

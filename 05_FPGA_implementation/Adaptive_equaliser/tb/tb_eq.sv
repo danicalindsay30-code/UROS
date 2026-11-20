@@ -2,10 +2,10 @@
 //=====================================================================
 // tb_eq: the full equaliser against cma_int.py
 //---------------------------------------------------------------------
-// Same idea as your matched filter testbench: a DRIVER pushes samples
+// Same idea as the matched filter testbench: a DRIVER pushes samples
 // in, a separate MONITOR checks every output when out_valid is high.
 // New here: a ready/valid handshake, because the equaliser only accepts
-// a sample when in_ready is high (once every 4 clocks after the fill).
+// a sample when in_ready is high (once every 6 clocks after the fill).
 //
 // The driver changes inputs on the FALLING edge, so the design (which
 // samples on the rising edge) never races the testbench.

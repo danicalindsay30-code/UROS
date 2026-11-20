@@ -2,7 +2,7 @@
 //=====================================================================
 // eq_pkg
 //---------------------------------------------------------------------
-// Every width, fractional-bit count and shift from ../FORMATS.md, in
+// Every width, fractional-bit count and shift (README.md section 3), in
 // one place. Each module starts with `import eq_pkg::*;` so a format
 // change is a one-line edit here, never a hunt through six files.
 //
@@ -40,7 +40,7 @@ package eq_pkg;
     localparam longint R_INT   = 64'sd1 <<< MAG2_F;         // R = 1.0 in the |y|^2 format
     localparam longint W_ONE   = 64'sd1 <<< W_F;            // 1.0 as a tap: single-spike value
 
-    // ---- filter index: input, output (your Python names) ----------
+    // ---- filter index: input, output (golden-model names) ---------
     // y_x = FIR(XX on x window) + FIR(YX on y window)
     // y_y = FIR(XY on x window) + FIR(YY on y window)
     localparam int XX = 0, XY = 1, YX = 2, YY = 3;

@@ -14,7 +14,7 @@
 //
 // Width: each product part is 33 bits; summing N adds $clog2(N) bits.
 //
-// PIPELINE REGISTER after the multipliers (same as your matched filter's
+// PIPELINE REGISTER after the multipliers (same as the matched filter's
 // product_reg). Without it, multiply + 20-term add + round took 10.5 ns
 // and failed 100 MHz. With it, the sum is ready one clock after the
 // inputs: the state machine waits one extra clock (S_MUL).
@@ -56,7 +56,7 @@ module complex_fir #(
         pi <= pi_c;
     end
 
-    // add up all taps (same pattern as your fir_param accumulator)
+    // add up all taps (same pattern as the fir_param accumulator)
     always_comb begin
         sr = '0;
         si = '0;

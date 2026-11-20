@@ -2,7 +2,7 @@
 //=====================================================================
 // eq_board_top: KR260 hardware test harness for the CMA equaliser
 //---------------------------------------------------------------------
-// Same idea as your matched filter top_module, plus an on-chip checker:
+// Same idea as the matched filter top_module, plus an on-chip checker:
 //
 //   ROM_IN  (10,008 x 32 bit)  input symbols from eq_in.txt
 //      │  {yi, yr, xi, xr}, one per address

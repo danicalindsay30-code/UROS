@@ -70,7 +70,7 @@ def bit_error_rate(tx_bits, rx_bits):
 def symbol_error_rate(tx_symbols, decided_symbols):
     """
     tx_symbols, decided_symbols : complex arrays, same length,
-    already aligned (same indexing convention as your BER call).
+    already aligned (same indexing convention as the BER calculation).
     """
     if len(tx_symbols) != len(decided_symbols):
         raise ValueError(f"Length mismatch: {len(tx_symbols)} vs {len(decided_symbols)}")

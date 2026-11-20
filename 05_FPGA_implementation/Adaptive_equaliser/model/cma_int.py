@@ -2,7 +2,7 @@
 cma_int.py
 ==========
 Bit-exact integer model of the 2x2 CMA butterfly equaliser. This is the
-reference the RTL must match with 0 mismatches. Formats: ../FORMATS.md.
+reference the RTL must match with 0 mismatches. Formats: ../README.md section 3.
 
 It works the way the hardware will, not the way adaptive_equaliser.py loops:
 
@@ -28,7 +28,7 @@ import numpy as np
 import chain
 import float_ranges
 
-# ---- formats (FORMATS.md) ---------------------------------------------------
+# ---- formats (README.md section 3, rtl/eq_pkg.sv) ----------------------------
 X_BITS, X_FRAC = 8, 5        # input, Q3.5
 W_BITS, W_FRAC = 24, 22      # taps, Q2.22
 Y_BITS, Y_FRAC = 16, 13      # output, Q3.13
@@ -46,7 +46,7 @@ G_SHIFT = EY_FRAC + MU_SHIFT - G_FRAC    # 12
 DW_FRAC = G_FRAC + X_FRAC                # 28
 DW_SHIFT = DW_FRAC - W_FRAC              # 6
 
-FILTERS = ("xx", "xy", "yx", "yy")       # input, output (your Python names)
+FILTERS = ("xx", "xy", "yx", "yy")       # input, output (golden-model names)
 
 
 def rshift_round(v, s):

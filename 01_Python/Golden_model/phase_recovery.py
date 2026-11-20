@@ -10,7 +10,7 @@ def bps_phase_recovery(z, constellation, N=25, B=64):
     z : 1D complex ndarray
         Equalized signal, 1 sample/symbol, normalized to unit power.
     constellation : 1D complex ndarray
-        Reference constellation points (your existing `constellation` array).
+        Reference constellation points (the `constellation` array in main.py).
     N : int
         Number of past/future symbols used per phase estimate.
         Block length L = 2N+1. Larger N -> smoother estimate but slower

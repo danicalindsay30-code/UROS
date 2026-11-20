@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 Rs = 32e9
 B_ref = 12.5e9
 bits_per_symbol = 2      # QPSK
-num_polarisations = 2    # matches your pipeline default
+num_polarisations = 2    # matches the run_pipeline default
 
 osnr_values = np.array([8, 10, 12, 14, 16, 18, 20, 22, 25])
 ber_measured = np.array([4.05098e-01, 7.80825e-02, 1.01392e-02, 1.57216e-03,

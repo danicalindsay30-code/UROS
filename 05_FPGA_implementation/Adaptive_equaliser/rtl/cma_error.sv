@@ -2,7 +2,7 @@
 //=====================================================================
 // cma_error: y -> e and g for both outputs
 //---------------------------------------------------------------------
-// Per output (your Python: error = R - abs(out)**2 ; mu*error*conj(out)):
+// Per output (golden model: error = R - abs(out)**2 ; mu*error*conj(out)):
 //     mag2 = re^2 + im^2                         exact, frac 26
 //     e    = sat16( (R - mag2 + 2^13) >>> 14 )   Q4.12
 //     ey   = e * conj(y)                         frac 25

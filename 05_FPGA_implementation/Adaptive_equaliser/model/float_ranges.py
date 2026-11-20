@@ -1,12 +1,12 @@
 """
 float_ranges.py
 ===============
-Step 1 evidence. Runs your float equaliser (same maths as
+Range and step-size study. Runs the float equaliser (same maths as
 adaptive_equaliser.py + adaptive_algorithim.cma) with every intermediate
 recorded, then prints:
 
   1. a fidelity check: the instrumented copy gives the same outputs as
-     your adaptive_equalizer()
+     adaptive_equalizer() in the golden model
   2. BER/SER for mu = 1e-3 (main.py) against mu = 2^-10
   3. the range of every signal the hardware has to carry
 
@@ -69,7 +69,7 @@ def bits_for(v):
 if __name__ == "__main__":
     rx, tx_h, tx_v = chain.make_rx(seed=2, osnr_db=20)
 
-    # 1. fidelity check against your own function
+    # 1. fidelity check against the golden-model function
     for n_taps in (5, 21):
         ox, oy, _ = equalise_traced(rx, n_taps, chain.MU, chain.R)
         rx_, ry_ = ae.adaptive_equalizer(rx, n_taps, chain.MU, chain.R)

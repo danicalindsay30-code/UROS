@@ -6,7 +6,7 @@ Turns the cma_int.py vectors into the two ROM images for eq_board_top.
   eq_in_rom.mem   one 32-bit hex word per input symbol   {yi, yr, xi, xr}
   eq_ref_rom.mem  one 64-bit hex word per output         {yy_im, yy_re, yx_im, yx_re}
 
-Each field is two's complement (v & mask), same trick as your matched
+Each field is two's complement (v & mask), same packing as the matched
 filter's convert_samples_to_coe.py. Unused ROM addresses are padded with 0.
 
 Usage:  python make_mem.py 5
